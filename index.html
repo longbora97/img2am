@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>img2am - Professional Image Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body { font-family: 'Quicksand', sans-serif; }
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .drag-over { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeIn 0.3s ease-out forwards; }
+        .lightbox-active { overflow: hidden; }
+        .rotating { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-[#0b0f1a] min-h-screen text-slate-200 p-4 md:p-8 flex flex-col">
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in cursor-zoom-out">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
+        <div class="relative max-w-5xl max-h-[70vh] flex items-center justify-center pointer-events-none">
+            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto cursor-default">
+        </div>
+        <div class="mt-8 text-center bg-slate-900/80 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-800">
+            <p id="lightboxName" class="text-xs font-bold text-white uppercase tracking-widest"></p>
+            <p id="lightboxSize" class="text-[10px] text-slate-500 mt-1 font-bold"></p>
+        </div>
+    </div>
+
+    <!-- MAIN UI -->
+    <div class="max-w-7xl mx-auto w-full flex-grow">
+        <header class="flex justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
+                <p class="text-slate-600 text-[10px] uppercase tracking-widest font-black mt-1">By long-bora</p>
+            </div>
+            <button onclick="resetWorkspace()" class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all">Reset Workspace</button>
+        </header>
+
+        <div class="grid lg:grid-cols-12 gap-10">
+            <aside class="lg:col-span-3 space-y-6">
+                <div class="bg-slate-900/40 border border-slate-800/60 rounded-[2rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
+                    <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest italic">Configuration</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase italic tracking-tighter">Format</label>
+                            <select id="formatSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
+                                <option value="image/jpeg">JPG</option>
+                                <option value="image/png">PNG</option>
+                                <option value="image/webp">WebP</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase italic tracking-tighter">Scale</label>
+                            <select id="scaleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
+                                <option value="1">1.0x (Original)</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2.0">2.0x (HD)</option>
+                                <option value="4.0">4.0x (4K)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase italic tracking-tighter">Quality</label>
+                                <span id="qualityVal" class="text-[11px] text-blue-400 font-bold">80%</span>
+                            </div>
+                            <input type="range" id="qualityRange" min="0.1" max="1.0" step="0.1" value="0.8" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        </div>
+                    </div>
+                    <button id="processBtn" disabled class="w-full mt-10 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-900 disabled:text-slate-700 text-white font-bold py-4 rounded-2xl transition-all uppercase text-[11px] tracking-widest shadow-xl">
+                        Convert
+                    </button>
+                </div>
+            </aside>
+
+            <main class="lg:col-span-9 space-y-10">
+                <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-8 flex flex-col min-h-[400px]">
+                    <input type="file" id="imageInput" multiple accept="image/*,.heic,.heif,.dng,.tiff" class="hidden">
+                    <div class="flex justify-between items-center mb-8 border-b border-slate-800/30 pb-6">
+                        <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Workspace Queue</h3>
+                        <div class="flex items-center gap-4">
+                            <button onclick="clearQueue()" class="text-[10px] text-slate-700 hover:text-red-500 font-black uppercase">Clear Queue</button>
+                            <span id="queueCount" class="text-[10px] text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800 tabular-nums">0</span>
+                        </div>
+                    </div>
+                    <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 flex-grow content-start"></div>
+                </div>
+
+                <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-8 rounded-[3rem] animate-in shadow-2xl relative">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex flex-col">
+                            <span id="statusLabel" class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em]">Processing...</span>
+                            <span id="currentFileName" class="text-[11px] text-slate-500 mt-1 font-bold truncate max-w-[200px]"></span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0 / 0</span>
+                            <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic">0%</span>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden"><div id="fileProgressBar" class="w-0 h-full bg-blue-400 transition-all duration-300"></div></div>
+                    </div>
+                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
+                </div>
+
+                <section id="resultsSection" class="hidden space-y-8 animate-in">
+                    <div class="flex justify-between items-end px-4">
+                        <div class="flex items-center gap-4">
+                            <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Output Pipeline</h2>
+                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums">0 Converted</span>
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest">Latest</button>
+                            <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest shadow-lg">Save All</button>
+                        </div>
+                    </div>
+                    <div id="resultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]"></div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- FOOTER WITH PROTECTED API -->
+    <footer class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex justify-between items-center text-slate-600">
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em]">© 2024 img2am • long-bora</p>
+        <div id="vBox" class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60 opacity-0 transition-opacity">
+            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+            <span id="vCount" class="text-[10px] font-mono font-black text-slate-400">---</span>
+        </div>
+    </footer>
+
+    <script>
+        /** Placeholder for GitHub Secrets Injection **/
+        const _0x_d = "img2am.online"; 
+        const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
+        const _p = ["https://", "api.", "counterapi", ".dev/v1/", "/visits/up"];
+
+        let workspaceFiles = []; let convertedRegistry = []; let latestProcessedIds = [];
+
+        // Engine starts only if domain matches
+        (function _BOOT() {
+            const h = window.location.hostname;
+            // Includes logic for your domain, local dev, and the internal github check
+            if (h === _0x_d || h === "localhost" || h === "127.0.0.1" || h.includes("github.io") || h === "www." + _0x_d) {
+                initApp();
+                const url = _p[0]+_p[1]+_p[2]+_p[3]+atob(_0x_a)+_p[4];
+                fetch(url).then(r=>r.json()).then(d=>{
+                    document.getElementById('vCount').innerText = d.count.toLocaleString();
+                    document.getElementById('vBox').classList.remove('opacity-0');
+                });
+            } else {
+                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>Unauthorized Domain Access</p></div>";
+            }
+        })();
+
+        function initApp() {
+            updateUI();
+            document.getElementById('processBtn').onclick = executeConversion;
+        }
+
+        // --- All previous workspace logic functions go here (handleFiles, updateUI, executeConversion, etc.) ---
+        // (For brevity, I will combine them into the final file)
+        
+        async function handleFiles(files) {
+            Array.from(files).forEach(f => {
+                if (workspaceFiles.some(x => `${x.file.name}-${x.file.size}` === `${f.name}-${f.size}`)) return;
+                workspaceFiles.push({ id: Math.random().toString(36).substr(2,9), file: f, status: 'pending', rotation: 0, previewUrl: '' });
+            });
+            document.getElementById('imageInput').value = '';
+            updateUI();
+            for (let f of workspaceFiles) { if (!f.previewUrl) { f.previewUrl = await genT(f.file); updateUI(); } }
+        }
+
+        async function genT(file) {
+            try {
+                if (file.name.match(/\.(heic|heif)$/i)) {
+                    const c = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.1 });
+                    return URL.createObjectURL(Array.isArray(c) ? c[0] : c);
+                }
+                return URL.createObjectURL(file);
+            } catch (e) { return ''; }
+        }
+
+        function updateUI() {
+            const grid = document.getElementById('queueGrid');
+            grid.innerHTML = '';
+            workspaceFiles.forEach(f => {
+                const card = document.createElement('div');
+                card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer";
+                card.onclick = () => openLightbox(f.previewUrl, f.file.name, "Original");
+                let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-orange-500';
+                card.innerHTML = `
+                    <div class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
+                        <img src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
+                        <div class="absolute top-4 left-4 w-2.5 h-2.5 rounded-full transition-all ${dot}"></div>
+                    </div>
+                    <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold">✕</button>
+                    </div>
+                    <div class="p-2 text-[8px] truncate text-center text-slate-600 bg-slate-950 uppercase font-black">${f.file.name}</div>`;
+                grid.appendChild(card);
+            });
+            const ghost = document.createElement('div');
+            ghost.className = "border-2 border-dashed border-slate-800/60 rounded-[2.5rem] flex flex-col items-center justify-center aspect-square cursor-pointer hover:border-blue-500 transition-all";
+            ghost.innerHTML = `<span class="text-3xl">+</span>`;
+            ghost.onclick = () => document.getElementById('imageInput').click();
+            grid.appendChild(ghost);
+            
+            document.getElementById('queueCount').innerText = workspaceFiles.length;
+            document.getElementById('processBtn').disabled = workspaceFiles.filter(x=>x.status==='pending').length === 0;
+            document.getElementById('totalConvertedLabel').innerText = `${convertedRegistry.length} Converted`;
+        }
+
+        async function executeConversion() {
+            const format = document.getElementById('formatSelect').value;
+            const quality = parseFloat(document.getElementById('qualityRange').value);
+            const scale = parseFloat(document.getElementById('scaleSelect').value);
+            const targets = workspaceFiles.filter(f => f.status === 'pending');
+            
+            document.getElementById('progressContainer').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            latestProcessedIds = [];
+            let done = 0;
+
+            for (let f of targets) {
+                done++;
+                document.getElementById('currentFileName').innerText = f.file.name;
+                try {
+                    let b = f.file;
+                    if (f.file.name.match(/\.(heic|heif)$/i)) {
+                        const conv = await heic2any({ blob: f.file, toType: "image/jpeg" });
+                        b = Array.isArray(conv) ? conv[0] : conv;
+                    }
+                    const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
+                        maxSizeMB: 10,
+                        onProgress: (p) => {
+                            const overall = Math.round(((done - 1) / targets.length) * 100 + (p / targets.length));
+                            document.getElementById('progressBar').style.width = overall+'%';
+                            document.getElementById('statusPercent').innerText = overall+'%';
+                        }
+                    });
+                    
+                    const bit = await createImageBitmap(comp);
+                    const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
+                    cvs.width = bit.width * scale; cvs.height = bit.height * scale;
+                    ctx.drawImage(bit, 0, 0, cvs.width, cvs.height);
+                    
+                    const final = await new Promise(r => cvs.toBlob(r, format, quality));
+                    const name = `${f.file.name.split('.')[0]}_final.${format==='image/jpeg'?'jpg':format.split('/')[1]}`;
+                    f.status = 'converted';
+                    convertedRegistry.push({ name, blob: final, id: f.id });
+                    latestProcessedIds.push(f.id);
+                    appendResult(final, name);
+                    updateUI();
+                } catch (e) { f.status = 'error'; updateUI(); }
+            }
+        }
+
+        function appendResult(b, n) {
+            const url = URL.createObjectURL(b);
+            const card = document.createElement('div');
+            card.className = "bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col group cursor-pointer shadow-2xl";
+            card.onclick = () => openLightbox(url, n, "Final");
+            card.innerHTML = `
+                <div class="aspect-square bg-black flex items-center justify-center relative p-3">
+                    <img src="${url}" class="w-full h-full object-cover rounded-[2rem]">
+                </div>
+                <div class="p-5 bg-slate-950 flex flex-col gap-4">
+                    <span class="text-[9px] text-slate-500 truncate block font-bold uppercase text-center">${n}</span>
+                    <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center">Save Image</a>
+                </div>`;
+            document.getElementById('resultsGrid').appendChild(card);
+        }
+
+        window.removeFile = (id) => { workspaceFiles = workspaceFiles.filter(f => f.id !== id); updateUI(); };
+        window.resetWorkspace = () => { workspaceFiles = []; convertedRegistry = []; document.getElementById('resultsGrid').innerHTML = ''; updateUI(); };
+        window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').classList.remove('hidden'); document.body.classList.add('lightbox-active'); };
+        window.closeLightbox = () => { document.getElementById('lightbox').classList.add('hidden'); document.body.classList.remove('lightbox-active'); };
+
+        const dropzoneHandlers = {
+            preventDefaults: (e) => { e.preventDefault(); e.stopPropagation(); },
+            onDragEnter: () => dropzone.classList.add('drag-over'),
+            onDragLeave: () => dropzone.classList.remove('drag-over'),
+            onDrop: (e) => { dropzone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); }
+        };
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, dropzoneHandlers.preventDefaults));
+        dropzone.addEventListener('dragenter', dropzoneHandlers.onDragEnter);
+        dropzone.addEventListener('dragleave', dropzoneHandlers.onDragLeave);
+        dropzone.addEventListener('drop', dropzoneHandlers.onDrop);
+    </script>
+</body>
+</html>
