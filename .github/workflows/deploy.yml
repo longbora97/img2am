@@ -1,0 +1,25 @@
+name: Deploy Protected img2am
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Inject Domain
+        run: |
+          # This replaces the placeholder with your Namecheap domain
+          sed -i "s/{{ALLOWED_DOMAIN}}/${{ secrets.MY_DOMAIN }}/g" index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
