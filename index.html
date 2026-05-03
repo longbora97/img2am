@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>img2am - Professional Image Lab</title>
+    <title>img2am - By Long Bora</title>
+    
+    <!-- FAVICON (Option 4: Abstract A) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 85 L50 15 L80 85' stroke='%236366f1' stroke-width='15' stroke-linecap='round' stroke-linejoin='round' fill='none'/><rect x='42' y='55' width='16' height='16' rx='4' fill='%2310b981'/></svg>">
+
     <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -27,7 +31,7 @@
 <body class="bg-[#0b0f1a] min-h-screen text-slate-200 p-4 md:p-8 flex flex-col">
 
     <!-- UNIVERSAL LIGHTBOX -->
-    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in cursor-zoom-out">
+    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
         <div class="relative max-w-5xl max-h-[70vh] flex items-center justify-center pointer-events-none">
             <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto cursor-default">
@@ -38,13 +42,13 @@
         </div>
     </div>
 
-    <!-- ERROR REPORT MODAL -->
+    <!-- ERROR REPORT -->
     <div id="errorReportModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
         <div class="bg-slate-900 border border-red-500/30 w-full max-w-md rounded-[2.5rem] p-8 text-center shadow-2xl">
-            <div class="text-4xl mb-4 text-red-500">💥</div>
+            <div class="text-4xl mb-4">💥</div>
             <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2">Processing Errors</h2>
-            <div id="errorFileList" class="text-xs text-red-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap"></div>
-            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close Report</button>
+            <div id="errorFileList" class="text-xs text-red-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold"></div>
+            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close</button>
         </div>
     </div>
 
@@ -52,26 +56,25 @@
     <div id="duplicateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
         <div class="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-[2.5rem] overflow-hidden shadow-2xl animate-in">
             <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-amber-400">Duplicate Check</h2>
-                <span id="duplicateCountLabel" class="bg-amber-400/10 text-amber-400 px-3 py-1 rounded-full text-[10px] font-bold">0 Conflicts</span>
+                <h2 class="text-sm font-bold uppercase tracking-widest text-amber-400 italic">Duplicate Conflict</h2>
+                <span id="duplicateCountLabel" class="bg-amber-400/10 text-amber-400 px-3 py-1 rounded-full text-[10px] font-bold">0</span>
             </div>
             <div id="duplicateList" class="p-6 max-h-[400px] overflow-y-auto custom-scroll grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
             <div class="p-6 bg-slate-950/50 border-t border-slate-800 flex gap-3 justify-end">
                 <button onclick="resolveAll('cancel')" class="px-6 py-2 text-[10px] font-bold uppercase text-slate-500">Cancel</button>
                 <button onclick="resolveAll('skip')" class="px-6 py-2 bg-slate-800 rounded-xl text-[10px] font-bold uppercase tracking-widest">Skip</button>
-                <button onclick="resolveAll('replace')" class="px-6 py-2 bg-blue-600 rounded-xl text-[10px] font-bold uppercase text-white shadow-lg shadow-blue-500/20 tracking-widest">Replace All</button>
+                <button onclick="resolveAll('replace')" class="px-6 py-2 bg-blue-600 rounded-xl text-[10px] font-bold uppercase text-white shadow-lg tracking-widest">Replace All</button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN UI -->
     <div id="mainContent" class="max-w-7xl mx-auto w-full flex-grow opacity-0 transition-opacity duration-500">
-        <header class="flex justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
             <div>
                 <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
                 <p class="text-slate-600 text-[10px] uppercase tracking-widest font-black mt-1">By long-bora</p>
             </div>
-            <button onclick="resetWorkspace()" class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all">Reset Workspace</button>
+            <button onclick="resetWorkspace()" class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all">Master Reset</button>
         </header>
 
         <div class="grid lg:grid-cols-12 gap-10">
@@ -93,8 +96,8 @@
                             <select id="scaleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300">
                                 <option value="1">1.0x (Original)</option>
                                 <option value="1.5">1.5x</option>
-                                <option value="2.0x">2.0x (HD)</option>
-                                <option value="4.0x">4.0x (4K)</option>
+                                <option value="2.0">2.0x (HD)</option>
+                                <option value="4.0">4.0x (4K)</option>
                             </select>
                         </div>
                         <div>
@@ -108,7 +111,7 @@
                     <button id="processBtn" disabled class="w-full mt-10 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-900 disabled:text-slate-700 text-white font-bold py-4 rounded-2xl transition-all uppercase text-[11px] tracking-widest shadow-xl">
                         Convert
                     </button>
-                    <p id="convertHelperText" class="text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic hidden">No new images to convert</p>
+                    <p id="helper" class="text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic hidden">No new images to convert</p>
                 </div>
             </aside>
 
@@ -126,7 +129,7 @@
                     <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 flex-grow content-start"></div>
                 </div>
 
-                <!-- WEIGHTED PROGRESS -->
+                <!-- PROGRESS AREA -->
                 <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-8 rounded-[3rem] animate-in shadow-2xl relative">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex flex-col">
@@ -135,29 +138,29 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0 / 0</span>
-                            <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic">0%</span>
+                            <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic tracking-tighter">0%</span>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[8px] text-slate-700 uppercase font-black tracking-widest italic tracking-widest">Current File Progress</span>
-                            <span id="fileProgressText" class="text-[8px] text-blue-500 font-bold">0%</span>
+                        <div class="flex justify-between items-center mb-2 text-[8px] uppercase font-black tracking-widest">
+                            <span class="text-slate-700 italic">File Optimization</span>
+                            <span id="fileProgressText" class="text-blue-500">0%</span>
                         </div>
                         <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden"><div id="fileProgressBar" class="w-0 h-full bg-blue-400 transition-all duration-300"></div></div>
                     </div>
                     <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
                 </div>
 
-                <!-- RESULTS -->
+                <!-- RESULTS (Renamed Header + Fixed Square Layout) -->
                 <section id="resultsSection" class="hidden space-y-8 animate-in">
                     <div class="flex justify-between items-end px-4 gap-4">
                         <div class="flex items-center gap-4">
-                            <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Output Pipeline</h2>
-                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums">0 Converted</span>
+                            <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Converted Images</h2>
+                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Files</span>
                         </div>
-                        <div class="flex gap-3">
-                            <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest transition-all">Latest</button>
-                            <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10">Download All</button>
+                        <div class="flex gap-4">
+                            <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest">Latest</button>
+                            <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest shadow-lg">Download All</button>
                         </div>
                     </div>
                     <div id="resultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]"></div>
@@ -171,14 +174,14 @@
         <p class="text-[10px] font-bold uppercase tracking-[0.3em]">© 2024 img2am • long-bora</p>
         <div id="vBox" class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
-            <span id="vCount" class="text-[10px] font-mono font-black text-slate-400">---</span>
+            <span id="vCount" class="text-[10px] font-mono font-black text-slate-400 tracking-widest">---</span>
         </div>
     </footer>
 
     <script>
         /**
-         * img2am - SECURE BOOTLOADER
-         * Domain Lock + Functional Hostage + Weighted Progress
+         * img2am - MASTER ENGINE BY LONG BORA
+         * FEATURES: Domain Lock, Sequential Logic, Weighted Progress, Unified Grid
          */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
@@ -201,8 +204,8 @@
                 initApp();
                 const url = _p[0]+_p[1]+_p[2]+_p[3]+atob(_0x_a)+_p[4];
                 fetch(url).then(r=>r.json()).then(d=>{
-                    document.getElementById('vCount').innerText = d.count.toLocaleString() + " Hits";
-                }).catch(() => document.getElementById('vCount').innerText = "Online");
+                    document.getElementById('vCount').innerText = d.count.toLocaleString() + " HITS";
+                }).catch(() => document.getElementById('vCount').innerText = "ONLINE");
             } else {
                 document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>License restricted to "+_0x_d+"</p></div>";
             }
@@ -224,26 +227,13 @@
         }
 
         async function handleFiles(files) {
-            const incoming = Array.from(files);
-            const duplicates = [];
-            const fresh = [];
-            const supported = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'dng', 'tiff'];
-
-            incoming.forEach(file => {
-                const ext = file.name.split('.').pop().toLowerCase();
+            Array.from(files).forEach(f => {
+                const supported = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'dng', 'tiff'];
+                const ext = f.name.split('.').pop().toLowerCase();
                 if(!supported.includes(ext)) return;
-                if (workspaceFiles.some(f => getMeta(f.file) === getMeta(file))) duplicates.push(file);
-                else fresh.push(file);
+                if (workspaceFiles.some(x => getMeta(x.file) === getMeta(f))) duplicates.push(f);
+                else workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: f, status: 'pending', previewUrl: '', rotation: 0 });
             });
-
-            fresh.forEach(f => {
-                workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: f, status: 'pending', previewUrl: '', rotation: 0 });
-            });
-            
-            if (duplicates.length > 0) {
-                pendingDuplicates = duplicates;
-                showDuplicateModal();
-            }
             document.getElementById('imageInput').value = '';
             updateUI();
             if(!isLoaderActive) runLoader();
@@ -286,7 +276,7 @@
                 card.id = `card-${f.id}`;
                 card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
                 card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
-                let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (f.status === 'error' ? 'bg-red-500' : 'bg-orange-500');
+                let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (f.status === 'error' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-orange-500');
                 card.innerHTML = `
                     <div class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
                         <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
@@ -297,7 +287,7 @@
                     <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                         <button onclick="event.stopPropagation(); rotateFile('${f.id}','left')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↺</button>
                         <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↻</button>
-                        <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold">✕</button>
+                        <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">✕</button>
                     </div>
                     <div class="p-2 text-[8px] truncate text-center text-slate-600 bg-slate-950 uppercase font-black">${f.file.name}</div>`;
                 grid.appendChild(card);
@@ -313,7 +303,7 @@
             document.getElementById('counterBadge').innerText = `${workspaceFiles.filter(x=>x.status==='converted').length} / ${workspaceFiles.length}`;
             document.getElementById('totalConvertedLabel').innerText = `${convertedRegistry.length} Converted`;
             document.getElementById('processBtn').disabled = pending === 0;
-            document.getElementById('convertHelperText').className = (workspaceFiles.length > 0 && pending === 0) ? "text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic" : "hidden";
+            document.getElementById('helper').className = (workspaceFiles.length > 0 && pending === 0) ? "text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic" : "hidden";
         }
 
         async function executeConversion() {
@@ -338,12 +328,13 @@
                     }
                     if (f.file.name.match(/\.(dng|tiff)$/i)) {
                         const ab = await f.file.arrayBuffer(); const ifds = UTIF.decode(ab); UTIF.decodeImage(ab, ifds[0]);
+                        const rgba = UTIF.toRGBA8(ifds[0]);
                         const cvs = document.createElement('canvas'); cvs.width = ifds[0].width; cvs.height = ifds[0].height;
-                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(UTIF.toRGBA8(ifds[0]).buffer), cvs.width, cvs.height), 0, 0);
+                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer), cvs.width, cvs.height), 0, 0);
                         b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
                     }
 
-                    const compressed = await imageCompression(new File([b], f.file.name, {type: format}), {
+                    const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
                         maxSizeMB: 10, maxWidthOrHeight: 10000,
                         onProgress: (p) => {
                             document.getElementById('fileProgressBar').style.width = p+'%';
@@ -354,7 +345,7 @@
                         }
                     });
                     
-                    const bit = await createImageBitmap(compressed);
+                    const bit = await createImageBitmap(comp);
                     const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
                     const isP = Math.abs(f.rotation) === 90 || Math.abs(f.rotation) === 270;
                     const w = bit.width * scale; const h = bit.height * scale;
@@ -367,7 +358,7 @@
                     f.status = 'converted';
                     convertedRegistry.push({ name, blob: final, id: f.id });
                     latestProcessedIds.push(f.id);
-                    appendResult(final, name);
+                    appendR(final, name);
                     updateUI();
                 } catch (e) { f.status = 'error'; errors.push(f.file.name); updateUI(); }
             }
@@ -375,27 +366,32 @@
                 document.getElementById('errorFileList').innerText = errors.join('\n');
                 document.getElementById('errorReportModal').classList.remove('hidden');
             }
-            document.getElementById('statusLabel').innerText = "Synthesized";
+            document.getElementById('statusLabel').innerText = "All Files Synthesized";
             document.getElementById('progressBar').style.width = '100%';
             document.getElementById('statusPercent').innerText = '100%';
         }
 
-        function appendResult(b, n) {
+        function appendR(b, n) {
             const url = URL.createObjectURL(b);
+            const grid = document.getElementById('resultsGrid');
             const card = document.createElement('div');
             card.className = "bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-in flex flex-col group cursor-pointer shadow-2xl";
             card.onclick = () => openLightbox(url, n, formatSize(b.size));
+            
+            // FIXED SQUARE THUMBNAIL LAYOUT
             card.innerHTML = `
-                <div class="aspect-square bg-black flex items-center justify-center relative p-3">
+                <div class="aspect-square bg-black flex items-center justify-center relative p-3 overflow-hidden">
                     <img src="${url}" class="w-full h-full object-cover rounded-[2rem]">
-                    <div class="absolute inset-0 bg-emerald-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-slate-950 italic">Preview</span></div>
-                    <span class="absolute bottom-3 right-3 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono">${formatSize(b.size)}</span>
+                    <div class="absolute inset-0 bg-emerald-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <span class="text-[10px] font-black uppercase text-slate-950 italic tracking-widest">Preview</span>
+                    </div>
+                    <span class="absolute bottom-4 right-4 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono tracking-tighter">${formatSize(b.size)}</span>
                 </div>
                 <div class="p-5 bg-slate-950 flex flex-col gap-4">
                     <span class="text-[9px] text-slate-500 truncate block font-bold uppercase text-center italic tracking-widest">${n}</span>
-                    <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center">Save Image</a>
+                    <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center transition-all shadow-lg">Save Image</a>
                 </div>`;
-            document.getElementById('resultsGrid').appendChild(card);
+            grid.appendChild(card);
         }
 
         function showDuplicateModal() {
@@ -406,7 +402,7 @@
                 const item = document.createElement('div');
                 item.className = "bg-slate-950 p-4 rounded-[1.5rem] border border-slate-800 flex flex-col items-center gap-3 relative cursor-pointer group";
                 item.innerHTML = `<div class="w-full aspect-square bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
-                    <img id="dup-img-${index}" class="w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                    <img id="dup-img-${index}" class="dup-img w-full h-full object-cover opacity-0 transition-opacity duration-700">
                     <div class="absolute inset-0 bg-amber-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[8px] font-black uppercase text-white">Preview</span></div>
                 </div><p class="text-[8px] text-slate-500 truncate w-full text-center font-bold uppercase tracking-tighter font-mono">${file.name}</p>`;
                 list.appendChild(item);
