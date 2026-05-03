@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>img2am - by Long Bora</title>
+    <title>img2am - Professional Image Lab</title>
+    <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <style>
-        body { font-family: 'Quicksand', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Quicksand', sans-serif; scroll-behavior: smooth; }
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .drag-over { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
@@ -35,8 +38,34 @@
         </div>
     </div>
 
+    <!-- ERROR REPORT MODAL -->
+    <div id="errorReportModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
+        <div class="bg-slate-900 border border-red-500/30 w-full max-w-md rounded-[2.5rem] p-8 text-center shadow-2xl">
+            <div class="text-4xl mb-4 text-red-500">💥</div>
+            <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2">Processing Errors</h2>
+            <div id="errorFileList" class="text-xs text-red-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap"></div>
+            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close Report</button>
+        </div>
+    </div>
+
+    <!-- DUPLICATE MODAL -->
+    <div id="duplicateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-[2.5rem] overflow-hidden shadow-2xl animate-in">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-amber-400">Duplicate Check</h2>
+                <span id="duplicateCountLabel" class="bg-amber-400/10 text-amber-400 px-3 py-1 rounded-full text-[10px] font-bold">0 Conflicts</span>
+            </div>
+            <div id="duplicateList" class="p-6 max-h-[400px] overflow-y-auto custom-scroll grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+            <div class="p-6 bg-slate-950/50 border-t border-slate-800 flex gap-3 justify-end">
+                <button onclick="resolveAll('cancel')" class="px-6 py-2 text-[10px] font-bold uppercase text-slate-500">Cancel</button>
+                <button onclick="resolveAll('skip')" class="px-6 py-2 bg-slate-800 rounded-xl text-[10px] font-bold uppercase tracking-widest">Skip</button>
+                <button onclick="resolveAll('replace')" class="px-6 py-2 bg-blue-600 rounded-xl text-[10px] font-bold uppercase text-white shadow-lg shadow-blue-500/20 tracking-widest">Replace All</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN UI -->
-    <div class="max-w-7xl mx-auto w-full flex-grow">
+    <div id="mainContent" class="max-w-7xl mx-auto w-full flex-grow opacity-0 transition-opacity duration-500">
         <header class="flex justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
             <div>
                 <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
@@ -46,30 +75,31 @@
         </header>
 
         <div class="grid lg:grid-cols-12 gap-10">
+            <!-- SIDEBAR -->
             <aside class="lg:col-span-3 space-y-6">
-                <div class="bg-slate-900/40 border border-slate-800/60 rounded-[2rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
-                    <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest italic">Configuration</h2>
+                <div class="bg-slate-900/40 border border-slate-800/60 rounded-[2.5rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
+                    <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest">Settings</h2>
                     <div class="space-y-6">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase italic tracking-tighter">Format</label>
-                            <select id="formatSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Format</label>
+                            <select id="formatSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300">
                                 <option value="image/jpeg">JPG</option>
                                 <option value="image/png">PNG</option>
                                 <option value="image/webp">WebP</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase italic tracking-tighter">Scale</label>
-                            <select id="scaleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Scale</label>
+                            <select id="scaleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300">
                                 <option value="1">1.0x (Original)</option>
                                 <option value="1.5">1.5x</option>
-                                <option value="2.0">2.0x (HD)</option>
-                                <option value="4.0">4.0x (4K)</option>
+                                <option value="2.0x">2.0x (HD)</option>
+                                <option value="4.0x">4.0x (4K)</option>
                             </select>
                         </div>
                         <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase italic tracking-tighter">Quality</label>
+                            <div class="flex justify-between mb-3">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-tighter italic">Quality</label>
                                 <span id="qualityVal" class="text-[11px] text-blue-400 font-bold">80%</span>
                             </div>
                             <input type="range" id="qualityRange" min="0.1" max="1.0" step="0.1" value="0.8" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
@@ -78,45 +108,56 @@
                     <button id="processBtn" disabled class="w-full mt-10 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-900 disabled:text-slate-700 text-white font-bold py-4 rounded-2xl transition-all uppercase text-[11px] tracking-widest shadow-xl">
                         Convert
                     </button>
+                    <p id="convertHelperText" class="text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic hidden">No new images to convert</p>
                 </div>
             </aside>
 
+            <!-- WORKSPACE -->
             <main class="lg:col-span-9 space-y-10">
                 <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-8 flex flex-col min-h-[450px]">
                     <input type="file" id="imageInput" multiple accept="image/*,.heic,.heif,.dng,.tiff" class="hidden">
                     <div class="flex justify-between items-center mb-8 border-b border-slate-800/30 pb-6">
                         <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Workspace Queue</h3>
                         <div class="flex items-center gap-4">
-                            <button onclick="clearQueue()" class="text-[10px] text-slate-700 hover:text-red-500 font-black uppercase">Clear Queue</button>
-                            <span id="queueCount" class="text-[10px] text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800 tabular-nums">0</span>
+                            <button onclick="clearQueue()" class="text-[10px] text-slate-700 hover:text-red-500 font-black uppercase transition-all">Clear Queue</button>
+                            <span id="queueCount" class="text-[10px] text-slate-500 font-mono bg-slate-900 px-3 py-1 rounded-full border border-slate-800 font-bold tabular-nums">0</span>
                         </div>
                     </div>
                     <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 flex-grow content-start"></div>
                 </div>
 
+                <!-- WEIGHTED PROGRESS -->
                 <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-8 rounded-[3rem] animate-in shadow-2xl relative">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex flex-col">
-                            <span id="statusLabel" class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em]">Processing...</span>
+                            <span id="statusLabel" class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">Processing Batch</span>
                             <span id="currentFileName" class="text-[11px] text-slate-500 mt-1 font-bold truncate max-w-[200px]"></span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums">0 / 0</span>
+                            <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0 / 0</span>
                             <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic">0%</span>
                         </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[8px] text-slate-700 uppercase font-black tracking-widest italic tracking-widest">Current File Progress</span>
+                            <span id="fileProgressText" class="text-[8px] text-blue-500 font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden"><div id="fileProgressBar" class="w-0 h-full bg-blue-400 transition-all duration-300"></div></div>
                     </div>
                     <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
                 </div>
 
+                <!-- RESULTS -->
                 <section id="resultsSection" class="hidden space-y-8 animate-in">
-                    <div class="flex justify-between items-end px-4">
+                    <div class="flex justify-between items-end px-4 gap-4">
                         <div class="flex items-center gap-4">
                             <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Output Pipeline</h2>
                             <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums">0 Converted</span>
                         </div>
-                        <div class="flex gap-4">
-                            <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest">Latest</button>
-                            <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest shadow-lg">Save All</button>
+                        <div class="flex gap-3">
+                            <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest transition-all">Latest</button>
+                            <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[9px] uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10">Download All</button>
                         </div>
                     </div>
                     <div id="resultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]"></div>
@@ -126,9 +167,9 @@
     </div>
 
     <!-- FOOTER WITH PROTECTED API -->
-    <footer class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex justify-between items-center text-slate-600">
+    <footer id="footer" class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex justify-between items-center text-slate-600 opacity-0 transition-opacity">
         <p class="text-[10px] font-bold uppercase tracking-[0.3em]">© 2024 img2am • long-bora</p>
-        <div id="vBox" class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60 opacity-0 transition-opacity">
+        <div id="vBox" class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
             <span id="vCount" class="text-[10px] font-mono font-black text-slate-400">---</span>
         </div>
@@ -136,37 +177,38 @@
 
     <script>
         /**
-         * SECURE BOOTLOADER - img2am.online
+         * img2am - SECURE BOOTLOADER
+         * Domain Lock + Functional Hostage + Weighted Progress
          */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
         const _p = ["https://", "api.", "counterapi", ".dev/v1/", "/visits/up"];
 
-        let workspaceFiles = []; let convertedRegistry = []; let latestProcessedIds = [];
+        let workspaceFiles = []; 
+        let convertedRegistry = [];
+        let latestProcessedIds = [];
         let isLoaderActive = false;
+        let pendingDuplicates = [];
 
         const formatSize = (b) => !b ? '0 B' : parseFloat((b / Math.pow(1024, Math.floor(Math.log(b) / Math.log(1024)))).toFixed(1)) + ' ' + ['B', 'KB', 'MB', 'GB'][Math.floor(Math.log(b) / Math.log(1024))];
         const getMeta = (f) => `${f.name}-${f.size}-${f.lastModified}`;
 
-        // BOOT SEQUENCE
         window.onload = function() {
             const h = window.location.hostname;
-            // Authorized domains
             if (h === _0x_d || h === "localhost" || h === "127.0.0.1" || h.includes("github.io") || h === "www." + _0x_d) {
+                document.getElementById('mainContent').classList.remove('opacity-0');
+                document.getElementById('footer').classList.remove('opacity-0');
                 initApp();
-                // Visitor counter with error safety
                 const url = _p[0]+_p[1]+_p[2]+_p[3]+atob(_0x_a)+_p[4];
                 fetch(url).then(r=>r.json()).then(d=>{
-                    document.getElementById('vCount').innerText = d.count.toLocaleString();
-                    document.getElementById('vBox').classList.remove('opacity-0');
-                }).catch(() => { document.getElementById('vCount').innerText = "Online"; document.getElementById('vBox').classList.remove('opacity-0'); });
+                    document.getElementById('vCount').innerText = d.count.toLocaleString() + " Hits";
+                }).catch(() => document.getElementById('vCount').innerText = "Online");
             } else {
-                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>Unauthorized Domain Access</p></div>";
+                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>License restricted to "+_0x_d+"</p></div>";
             }
         };
 
         function initApp() {
-            // Setup Listeners
             document.getElementById('qualityRange').oninput = (e) => document.getElementById('qualityVal').innerText = Math.round(e.target.value * 100) + "%";
             document.addEventListener('keydown', (e) => e.key === 'Escape' && closeLightbox());
             
@@ -178,15 +220,30 @@
             
             document.getElementById('imageInput').onchange = (e) => handleFiles(e.target.files);
             document.getElementById('processBtn').onclick = executeConversion;
-            
             updateUI();
         }
 
         async function handleFiles(files) {
-            Array.from(files).forEach(f => {
-                if (workspaceFiles.some(x => getMeta(x.file) === getMeta(f))) return;
-                workspaceFiles.push({ id: Math.random().toString(36).substr(2,9), file: f, status: 'pending', rotation: 0, previewUrl: '' });
+            const incoming = Array.from(files);
+            const duplicates = [];
+            const fresh = [];
+            const supported = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'dng', 'tiff'];
+
+            incoming.forEach(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
+                if(!supported.includes(ext)) return;
+                if (workspaceFiles.some(f => getMeta(f.file) === getMeta(file))) duplicates.push(file);
+                else fresh.push(file);
             });
+
+            fresh.forEach(f => {
+                workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: f, status: 'pending', previewUrl: '', rotation: 0 });
+            });
+            
+            if (duplicates.length > 0) {
+                pendingDuplicates = duplicates;
+                showDuplicateModal();
+            }
             document.getElementById('imageInput').value = '';
             updateUI();
             if(!isLoaderActive) runLoader();
@@ -194,12 +251,12 @@
 
         async function runLoader() {
             isLoaderActive = true;
-            for (let f of workspaceFiles) { 
-                if (!f.previewUrl) { 
-                    f.previewUrl = await genT(f.file); 
+            for (let f of workspaceFiles) {
+                if (!f.previewUrl) {
+                    f.previewUrl = await genT(f.file);
                     const img = document.getElementById(`prev-${f.id}`);
                     if(img) { img.src = f.previewUrl; img.onload = () => img.classList.remove('opacity-0'); }
-                } 
+                }
             }
             isLoaderActive = false;
         }
@@ -207,8 +264,8 @@
         async function genT(file) {
             try {
                 if (file.name.match(/\.(heic|heif)$/i)) {
-                    const c = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.1 });
-                    return URL.createObjectURL(Array.isArray(c) ? c[0] : c);
+                    const conv = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.1 });
+                    return URL.createObjectURL(Array.isArray(conv) ? conv[0] : conv);
                 }
                 return URL.createObjectURL(file);
             } catch (e) { return ''; }
@@ -229,12 +286,12 @@
                 card.id = `card-${f.id}`;
                 card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
                 card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
-                let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-orange-500';
+                let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (f.status === 'error' ? 'bg-red-500' : 'bg-orange-500');
                 card.innerHTML = `
                     <div class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
                         <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
                         <div class="absolute inset-0 bg-blue-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-white italic">Preview</span></div>
-                        <span class="absolute bottom-4 right-4 bg-slate-950/80 text-[7px] text-slate-300 px-2 py-0.5 rounded-full font-bold">${formatSize(f.file.size)}</span>
+                        <span class="absolute bottom-4 right-4 bg-slate-950/80 text-[7px] text-slate-300 px-2 py-0.5 rounded-full font-bold tabular-nums font-mono tracking-tighter">${formatSize(f.file.size)}</span>
                         <div class="absolute top-4 left-4 w-2.5 h-2.5 rounded-full transition-all ${dot}"></div>
                     </div>
                     <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
@@ -246,15 +303,17 @@
                 grid.appendChild(card);
             });
             const ghost = document.createElement('div');
-            ghost.className = "border-2 border-dashed border-slate-800/60 rounded-[2.5rem] flex flex-col items-center justify-center aspect-square cursor-pointer hover:border-blue-500 transition-all text-slate-700 hover:text-blue-400 group";
+            ghost.className = "border-2 border-dashed border-slate-800/60 rounded-[2.5rem] flex flex-col items-center justify-center aspect-square cursor-pointer hover:border-blue-500 hover:bg-blue-500/5 transition-all text-slate-800 hover:text-blue-500 group";
             ghost.innerHTML = `<span class="text-3xl group-hover:scale-110 transition-transform">+</span>`;
             ghost.onclick = () => document.getElementById('imageInput').click();
             grid.appendChild(ghost);
-            
+
+            const pending = workspaceFiles.filter(x=>x.status==='pending').length;
             document.getElementById('queueCount').innerText = workspaceFiles.length;
             document.getElementById('counterBadge').innerText = `${workspaceFiles.filter(x=>x.status==='converted').length} / ${workspaceFiles.length}`;
             document.getElementById('totalConvertedLabel').innerText = `${convertedRegistry.length} Converted`;
-            document.getElementById('processBtn').disabled = workspaceFiles.filter(x=>x.status==='pending').length === 0;
+            document.getElementById('processBtn').disabled = pending === 0;
+            document.getElementById('convertHelperText').className = (workspaceFiles.length > 0 && pending === 0) ? "text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic" : "hidden";
         }
 
         async function executeConversion() {
@@ -263,10 +322,10 @@
             const scale = parseFloat(document.getElementById('scaleSelect').value);
             const targets = workspaceFiles.filter(f => f.status === 'pending');
             const ext = format === 'image/jpeg' ? 'jpg' : format.split('/')[1];
-            
+
             document.getElementById('progressContainer').classList.remove('hidden');
             document.getElementById('resultsSection').classList.remove('hidden');
-            latestProcessedIds = []; let done = 0;
+            latestProcessedIds = []; let done = 0; let errors = [];
 
             for (let f of targets) {
                 done++;
@@ -284,22 +343,24 @@
                         b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
                     }
 
-                    const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
-                        maxSizeMB: 10,
+                    const compressed = await imageCompression(new File([b], f.file.name, {type: format}), {
+                        maxSizeMB: 10, maxWidthOrHeight: 10000,
                         onProgress: (p) => {
+                            document.getElementById('fileProgressBar').style.width = p+'%';
+                            document.getElementById('fileProgressText').innerText = p+'%';
                             const overall = Math.round(((done - 1) / targets.length) * 100 + (p / targets.length));
                             document.getElementById('progressBar').style.width = overall+'%';
                             document.getElementById('statusPercent').innerText = overall+'%';
                         }
                     });
                     
-                    const bit = await createImageBitmap(comp);
+                    const bit = await createImageBitmap(compressed);
                     const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
                     const isP = Math.abs(f.rotation) === 90 || Math.abs(f.rotation) === 270;
                     const w = bit.width * scale; const h = bit.height * scale;
                     cvs.width = isP ? h : w; cvs.height = isP ? w : h;
                     ctx.translate(cvs.width / 2, cvs.height / 2); ctx.rotate((f.rotation * Math.PI) / 180);
-                    ctx.drawImage(bit, -w / 2, -h / 2, w, h);
+                    ctx.imageSmoothingQuality = 'high'; ctx.drawImage(bit, -w / 2, -h / 2, w, h);
                     
                     const final = await new Promise(r => cvs.toBlob(r, format, quality));
                     const name = `${f.file.name.split('.')[0]}_final.${ext}`;
@@ -308,10 +369,15 @@
                     latestProcessedIds.push(f.id);
                     appendResult(final, name);
                     updateUI();
-                } catch (e) { f.status = 'error'; updateUI(); }
+                } catch (e) { f.status = 'error'; errors.push(f.file.name); updateUI(); }
             }
-            document.getElementById('statusLabel').innerText = "Complete";
-            document.getElementById('processBtn').disabled = false;
+            if(errors.length > 0) {
+                document.getElementById('errorFileList').innerText = errors.join('\n');
+                document.getElementById('errorReportModal').classList.remove('hidden');
+            }
+            document.getElementById('statusLabel').innerText = "Synthesized";
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('statusPercent').innerText = '100%';
         }
 
         function appendResult(b, n) {
@@ -327,10 +393,45 @@
                 </div>
                 <div class="p-5 bg-slate-950 flex flex-col gap-4">
                     <span class="text-[9px] text-slate-500 truncate block font-bold uppercase text-center italic tracking-widest">${n}</span>
-                    <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center">Save Image</a>
+                    <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center">Save Image</a>
                 </div>`;
             document.getElementById('resultsGrid').appendChild(card);
         }
+
+        function showDuplicateModal() {
+            const list = document.getElementById('duplicateList');
+            list.innerHTML = '';
+            document.getElementById('duplicateCountLabel').innerText = `${pendingDuplicates.length} Conflicts`;
+            pendingDuplicates.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-950 p-4 rounded-[1.5rem] border border-slate-800 flex flex-col items-center gap-3 relative cursor-pointer group";
+                item.innerHTML = `<div class="w-full aspect-square bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
+                    <img id="dup-img-${index}" class="w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                    <div class="absolute inset-0 bg-amber-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[8px] font-black uppercase text-white">Preview</span></div>
+                </div><p class="text-[8px] text-slate-500 truncate w-full text-center font-bold uppercase tracking-tighter font-mono">${file.name}</p>`;
+                list.appendChild(item);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById(`dup-img-${index}`);
+                    img.src = e.target.result; img.onload = () => img.classList.remove('opacity-0');
+                    item.onclick = () => openLightbox(e.target.result, file.name, formatSize(file.size));
+                };
+                reader.readAsDataURL(file.slice(0, 100000));
+            });
+            document.getElementById('duplicateModal').classList.remove('hidden');
+        }
+
+        window.resolveAll = (action) => {
+            if (action === 'replace') {
+                pendingDuplicates.forEach(file => {
+                    const oldIdx = workspaceFiles.findIndex(f => getMeta(f.file) === getMeta(file));
+                    if(oldIdx > -1) workspaceFiles.splice(oldIdx, 1);
+                    workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: file, status: 'pending', previewUrl: '', rotation: 0 });
+                });
+            }
+            pendingDuplicates = []; document.getElementById('duplicateModal').classList.add('hidden');
+            updateUI(); runLoader();
+        };
 
         window.removeFile = (id) => { workspaceFiles = workspaceFiles.filter(f => f.id !== id); updateUI(); };
         window.clearQueue = () => { workspaceFiles = []; updateUI(); };
