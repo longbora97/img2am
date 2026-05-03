@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        body { font-family: 'Quicksand', sans-serif; }
+        body { font-family: 'Quicksand', sans-serif; -webkit-tap-highlight-color: transparent; }
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .drag-over { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
@@ -23,7 +23,7 @@
 </head>
 <body class="bg-[#0b0f1a] min-h-screen text-slate-200 p-4 md:p-8 flex flex-col">
 
-    <!-- LIGHTBOX -->
+    <!-- UNIVERSAL LIGHTBOX -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in cursor-zoom-out">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
         <div class="relative max-w-5xl max-h-[70vh] flex items-center justify-center pointer-events-none">
@@ -39,7 +39,7 @@
     <div class="max-w-7xl mx-auto w-full flex-grow">
         <header class="flex justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
             <div>
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
+                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
                 <p class="text-slate-600 text-[10px] uppercase tracking-widest font-black mt-1">By long-bora</p>
             </div>
             <button onclick="resetWorkspace()" class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all">Reset Workspace</button>
@@ -82,7 +82,7 @@
             </aside>
 
             <main class="lg:col-span-9 space-y-10">
-                <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-8 flex flex-col min-h-[400px]">
+                <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-8 flex flex-col min-h-[450px]">
                     <input type="file" id="imageInput" multiple accept="image/*,.heic,.heif,.dng,.tiff" class="hidden">
                     <div class="flex justify-between items-center mb-8 border-b border-slate-800/30 pb-6">
                         <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Workspace Queue</h3>
@@ -101,12 +101,9 @@
                             <span id="currentFileName" class="text-[11px] text-slate-500 mt-1 font-bold truncate max-w-[200px]"></span>
                         </div>
                         <div class="flex items-center gap-4">
-                            <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0 / 0</span>
+                            <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums">0 / 0</span>
                             <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic">0%</span>
                         </div>
-                    </div>
-                    <div class="mb-4">
-                        <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden"><div id="fileProgressBar" class="w-0 h-full bg-blue-400 transition-all duration-300"></div></div>
                     </div>
                     <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
                 </div>
@@ -138,45 +135,73 @@
     </footer>
 
     <script>
-        /** Placeholder for GitHub Secrets Injection **/
+        /**
+         * SECURE BOOTLOADER - img2am.online
+         */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
         const _p = ["https://", "api.", "counterapi", ".dev/v1/", "/visits/up"];
 
         let workspaceFiles = []; let convertedRegistry = []; let latestProcessedIds = [];
+        let isLoaderActive = false;
 
-        // Engine starts only if domain matches
-        (function _BOOT() {
+        const formatSize = (b) => !b ? '0 B' : parseFloat((b / Math.pow(1024, Math.floor(Math.log(b) / Math.log(1024)))).toFixed(1)) + ' ' + ['B', 'KB', 'MB', 'GB'][Math.floor(Math.log(b) / Math.log(1024))];
+        const getMeta = (f) => `${f.name}-${f.size}-${f.lastModified}`;
+
+        // BOOT SEQUENCE
+        window.onload = function() {
             const h = window.location.hostname;
-            // Includes logic for your domain, local dev, and the internal github check
+            // Authorized domains
             if (h === _0x_d || h === "localhost" || h === "127.0.0.1" || h.includes("github.io") || h === "www." + _0x_d) {
                 initApp();
+                // Visitor counter with error safety
                 const url = _p[0]+_p[1]+_p[2]+_p[3]+atob(_0x_a)+_p[4];
                 fetch(url).then(r=>r.json()).then(d=>{
                     document.getElementById('vCount').innerText = d.count.toLocaleString();
                     document.getElementById('vBox').classList.remove('opacity-0');
-                });
+                }).catch(() => { document.getElementById('vCount').innerText = "Online"; document.getElementById('vBox').classList.remove('opacity-0'); });
             } else {
                 document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>Unauthorized Domain Access</p></div>";
             }
-        })();
+        };
 
         function initApp() {
-            updateUI();
+            // Setup Listeners
+            document.getElementById('qualityRange').oninput = (e) => document.getElementById('qualityVal').innerText = Math.round(e.target.value * 100) + "%";
+            document.addEventListener('keydown', (e) => e.key === 'Escape' && closeLightbox());
+            
+            const dz = document.getElementById('dropzone');
+            dz.addEventListener('dragenter', (e) => { e.preventDefault(); dz.classList.add('drag-over'); });
+            dz.addEventListener('dragover', (e) => e.preventDefault());
+            dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+            dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+            
+            document.getElementById('imageInput').onchange = (e) => handleFiles(e.target.files);
             document.getElementById('processBtn').onclick = executeConversion;
+            
+            updateUI();
         }
 
-        // --- All previous workspace logic functions go here (handleFiles, updateUI, executeConversion, etc.) ---
-        // (For brevity, I will combine them into the final file)
-        
         async function handleFiles(files) {
             Array.from(files).forEach(f => {
-                if (workspaceFiles.some(x => `${x.file.name}-${x.file.size}` === `${f.name}-${f.size}`)) return;
+                if (workspaceFiles.some(x => getMeta(x.file) === getMeta(f))) return;
                 workspaceFiles.push({ id: Math.random().toString(36).substr(2,9), file: f, status: 'pending', rotation: 0, previewUrl: '' });
             });
             document.getElementById('imageInput').value = '';
             updateUI();
-            for (let f of workspaceFiles) { if (!f.previewUrl) { f.previewUrl = await genT(f.file); updateUI(); } }
+            if(!isLoaderActive) runLoader();
+        }
+
+        async function runLoader() {
+            isLoaderActive = true;
+            for (let f of workspaceFiles) { 
+                if (!f.previewUrl) { 
+                    f.previewUrl = await genT(f.file); 
+                    const img = document.getElementById(`prev-${f.id}`);
+                    if(img) { img.src = f.previewUrl; img.onload = () => img.classList.remove('opacity-0'); }
+                } 
+            }
+            isLoaderActive = false;
         }
 
         async function genT(file) {
@@ -189,34 +214,47 @@
             } catch (e) { return ''; }
         }
 
+        function rotateFile(id, dir) {
+            const f = workspaceFiles.find(x => x.id === id);
+            f.rotation = (f.rotation + (dir === 'right' ? 90 : -90)) % 360;
+            const img = document.getElementById(`prev-${id}`);
+            if(img) img.style.transform = `rotate(${f.rotation}deg)`;
+        }
+
         function updateUI() {
             const grid = document.getElementById('queueGrid');
             grid.innerHTML = '';
             workspaceFiles.forEach(f => {
                 const card = document.createElement('div');
-                card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer";
-                card.onclick = () => openLightbox(f.previewUrl, f.file.name, "Original");
+                card.id = `card-${f.id}`;
+                card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
+                card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
                 let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-orange-500';
                 card.innerHTML = `
                     <div class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
-                        <img src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
+                        <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
+                        <div class="absolute inset-0 bg-blue-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-white italic">Preview</span></div>
+                        <span class="absolute bottom-4 right-4 bg-slate-950/80 text-[7px] text-slate-300 px-2 py-0.5 rounded-full font-bold">${formatSize(f.file.size)}</span>
                         <div class="absolute top-4 left-4 w-2.5 h-2.5 rounded-full transition-all ${dot}"></div>
                     </div>
                     <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','left')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↺</button>
+                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↻</button>
                         <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold">✕</button>
                     </div>
                     <div class="p-2 text-[8px] truncate text-center text-slate-600 bg-slate-950 uppercase font-black">${f.file.name}</div>`;
                 grid.appendChild(card);
             });
             const ghost = document.createElement('div');
-            ghost.className = "border-2 border-dashed border-slate-800/60 rounded-[2.5rem] flex flex-col items-center justify-center aspect-square cursor-pointer hover:border-blue-500 transition-all";
-            ghost.innerHTML = `<span class="text-3xl">+</span>`;
+            ghost.className = "border-2 border-dashed border-slate-800/60 rounded-[2.5rem] flex flex-col items-center justify-center aspect-square cursor-pointer hover:border-blue-500 transition-all text-slate-700 hover:text-blue-400 group";
+            ghost.innerHTML = `<span class="text-3xl group-hover:scale-110 transition-transform">+</span>`;
             ghost.onclick = () => document.getElementById('imageInput').click();
             grid.appendChild(ghost);
             
             document.getElementById('queueCount').innerText = workspaceFiles.length;
-            document.getElementById('processBtn').disabled = workspaceFiles.filter(x=>x.status==='pending').length === 0;
+            document.getElementById('counterBadge').innerText = `${workspaceFiles.filter(x=>x.status==='converted').length} / ${workspaceFiles.length}`;
             document.getElementById('totalConvertedLabel').innerText = `${convertedRegistry.length} Converted`;
+            document.getElementById('processBtn').disabled = workspaceFiles.filter(x=>x.status==='pending').length === 0;
         }
 
         async function executeConversion() {
@@ -224,11 +262,11 @@
             const quality = parseFloat(document.getElementById('qualityRange').value);
             const scale = parseFloat(document.getElementById('scaleSelect').value);
             const targets = workspaceFiles.filter(f => f.status === 'pending');
+            const ext = format === 'image/jpeg' ? 'jpg' : format.split('/')[1];
             
             document.getElementById('progressContainer').classList.remove('hidden');
             document.getElementById('resultsSection').classList.remove('hidden');
-            latestProcessedIds = [];
-            let done = 0;
+            latestProcessedIds = []; let done = 0;
 
             for (let f of targets) {
                 done++;
@@ -239,6 +277,13 @@
                         const conv = await heic2any({ blob: f.file, toType: "image/jpeg" });
                         b = Array.isArray(conv) ? conv[0] : conv;
                     }
+                    if (f.file.name.match(/\.(dng|tiff)$/i)) {
+                        const ab = await f.file.arrayBuffer(); const ifds = UTIF.decode(ab); UTIF.decodeImage(ab, ifds[0]);
+                        const cvs = document.createElement('canvas'); cvs.width = ifds[0].width; cvs.height = ifds[0].height;
+                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(UTIF.toRGBA8(ifds[0]).buffer), cvs.width, cvs.height), 0, 0);
+                        b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
+                    }
+
                     const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
                         maxSizeMB: 10,
                         onProgress: (p) => {
@@ -250,11 +295,14 @@
                     
                     const bit = await createImageBitmap(comp);
                     const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
-                    cvs.width = bit.width * scale; cvs.height = bit.height * scale;
-                    ctx.drawImage(bit, 0, 0, cvs.width, cvs.height);
+                    const isP = Math.abs(f.rotation) === 90 || Math.abs(f.rotation) === 270;
+                    const w = bit.width * scale; const h = bit.height * scale;
+                    cvs.width = isP ? h : w; cvs.height = isP ? w : h;
+                    ctx.translate(cvs.width / 2, cvs.height / 2); ctx.rotate((f.rotation * Math.PI) / 180);
+                    ctx.drawImage(bit, -w / 2, -h / 2, w, h);
                     
                     const final = await new Promise(r => cvs.toBlob(r, format, quality));
-                    const name = `${f.file.name.split('.')[0]}_final.${format==='image/jpeg'?'jpg':format.split('/')[1]}`;
+                    const name = `${f.file.name.split('.')[0]}_final.${ext}`;
                     f.status = 'converted';
                     convertedRegistry.push({ name, blob: final, id: f.id });
                     latestProcessedIds.push(f.id);
@@ -262,39 +310,36 @@
                     updateUI();
                 } catch (e) { f.status = 'error'; updateUI(); }
             }
+            document.getElementById('statusLabel').innerText = "Complete";
+            document.getElementById('processBtn').disabled = false;
         }
 
         function appendResult(b, n) {
             const url = URL.createObjectURL(b);
             const card = document.createElement('div');
-            card.className = "bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col group cursor-pointer shadow-2xl";
-            card.onclick = () => openLightbox(url, n, "Final");
+            card.className = "bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-in flex flex-col group cursor-pointer shadow-2xl";
+            card.onclick = () => openLightbox(url, n, formatSize(b.size));
             card.innerHTML = `
                 <div class="aspect-square bg-black flex items-center justify-center relative p-3">
                     <img src="${url}" class="w-full h-full object-cover rounded-[2rem]">
+                    <div class="absolute inset-0 bg-emerald-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-slate-950 italic">Preview</span></div>
+                    <span class="absolute bottom-3 right-3 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono">${formatSize(b.size)}</span>
                 </div>
                 <div class="p-5 bg-slate-950 flex flex-col gap-4">
-                    <span class="text-[9px] text-slate-500 truncate block font-bold uppercase text-center">${n}</span>
+                    <span class="text-[9px] text-slate-500 truncate block font-bold uppercase text-center italic tracking-widest">${n}</span>
                     <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center">Save Image</a>
                 </div>`;
             document.getElementById('resultsGrid').appendChild(card);
         }
 
         window.removeFile = (id) => { workspaceFiles = workspaceFiles.filter(f => f.id !== id); updateUI(); };
-        window.resetWorkspace = () => { workspaceFiles = []; convertedRegistry = []; document.getElementById('resultsGrid').innerHTML = ''; updateUI(); };
+        window.clearQueue = () => { workspaceFiles = []; updateUI(); };
+        window.resetWorkspace = () => { workspaceFiles = []; convertedRegistry = []; document.getElementById('resultsGrid').innerHTML = ''; document.getElementById('resultsSection').classList.add('hidden'); document.getElementById('progressContainer').classList.add('hidden'); updateUI(); };
         window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').classList.remove('hidden'); document.body.classList.add('lightbox-active'); };
         window.closeLightbox = () => { document.getElementById('lightbox').classList.add('hidden'); document.body.classList.remove('lightbox-active'); };
 
-        const dropzoneHandlers = {
-            preventDefaults: (e) => { e.preventDefault(); e.stopPropagation(); },
-            onDragEnter: () => dropzone.classList.add('drag-over'),
-            onDragLeave: () => dropzone.classList.remove('drag-over'),
-            onDrop: (e) => { dropzone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); }
-        };
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, dropzoneHandlers.preventDefaults));
-        dropzone.addEventListener('dragenter', dropzoneHandlers.onDragEnter);
-        dropzone.addEventListener('dragleave', dropzoneHandlers.onDragLeave);
-        dropzone.addEventListener('drop', dropzoneHandlers.onDrop);
+        document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_collection.zip`; l.click(); };
+        document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_batch.zip`; l.click(); };
     </script>
 </body>
 </html>
