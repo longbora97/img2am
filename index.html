@@ -634,6 +634,48 @@
 
         document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({ type: "blob" }); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_collection.zip`; l.click(); };
         document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({ type: "blob" }); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_batch.zip`; l.click(); };
+
+
+        // --- LEGAL LOGIC FOR ADSENSE APPROVAL ---
+        const legalData = {
+            privacy: `
+        <h2 class="text-white text-lg font-bold uppercase italic">Privacy Policy</h2>
+        <p>Your privacy is our priority. <strong>img2am</strong> is a client-side tool, meaning all image processing happens directly in your browser. We never upload, store, or see your images.</p>
+        
+        <h3 class="text-white font-bold uppercase mt-4">Cookies & Advertising</h3>
+        <p>We use Google AdSense to serve ads. Google uses cookies to serve ads based on your prior visits to this website or other websites. Google's use of advertising cookies enables it and its partners to serve ads based on your visit to our site and/or other sites on the Internet.</p>
+        
+        <h3 class="text-white font-bold uppercase mt-4">Opt-Out</h3>
+        <p>You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" class="text-blue-400 underline">Ads Settings</a>.</p>
+        
+        <h3 class="text-white font-bold uppercase mt-4">Third-Party Tools</h3>
+        <p>We use CounterAPI to track visitor numbers. No personal identification is stored during this process.</p>
+    `,
+            terms: `
+        <h2 class="text-white text-lg font-bold uppercase italic">Terms of Service</h2>
+        <p>By using <strong>img2am</strong>, you agree to the following terms:</p>
+        
+        <ul class="list-disc ml-4 space-y-2">
+            <li>The tool is provided "as is" without any warranties.</li>
+            <li>You are responsible for the images you process.</li>
+            <li>We are not liable for any data loss or browser crashes resulting from processing extremely large files.</li>
+            <li>Usage of this tool is free, supported by non-intrusive advertising.</li>
+        </ul>
+        
+        <p class="mt-4">This tool was created by <strong>long-bora</strong> for the global creative community.</p>
+    `
+        };
+
+        function openLegal(type) {
+            document.getElementById('legalContent').innerHTML = legalData[type];
+            document.getElementById('legalModal').classList.remove('hidden');
+            document.body.classList.add('lightbox-active');
+        }
+
+        function closeLegal() {
+            document.getElementById('legalModal').classList.add('hidden');
+            document.body.classList.remove('lightbox-active');
+        }
     </script>
 </body>
 
