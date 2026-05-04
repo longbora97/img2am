@@ -1,107 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>img2am - By Long Bora</title>
-    
+
     <!-- FAVICON (Option 4: Abstract A) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 85 L50 15 L80 85' stroke='%236366f1' stroke-width='15' stroke-linecap='round' stroke-linejoin='round' fill='none'/><rect x='42' y='55' width='16' height='16' rx='4' fill='%2310b981'/></svg>">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 85 L50 15 L80 85' stroke='%236366f1' stroke-width='15' stroke-linecap='round' stroke-linejoin='round' fill='none'/><rect x='42' y='55' width='16' height='16' rx='4' fill='%2310b981'/></svg>">
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="img2am - Professional Browser-Based Image Converter & Upscaler">
+    <meta name="description"
+        content="Convert, compress, rotate, and upscale images directly in your browser. Supports HEIC, RAW, JPG, PNG, and WebP. 100% private, client-side processing by long-bora.">
+    <meta name="keywords"
+        content="image converter, HEIC to JPG, image upscaler, photo compressor, browser image tool, long-bora, client-side converter, img2am, RAW converter, bulk image process">
+    <meta name="author" content="long-bora">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://img2am.online/">
+    <meta property="og:title" content="img2am - By Long Bora">
+    <meta property="og:description"
+        content="The ultimate private image tool. Convert HEIC/RAW, upscale 4x, and compress files locally. No server storage.">
+    <meta property="og:image" content="https://img2am.online/favicon.svg">
+    <!-- Note: You can replace this with a real 1200x630 image later -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://img2am.online/">
+    <meta property="twitter:title" content="img2am - By Long Bora">
+    <meta property="twitter:description"
+        content="High-performance image conversion and upscaling right in your browser. Privacy-focused and fast.">
+    <meta property="twitter:image" content="https://img2am.online/favicon.svg">
 
     <!-- Google Fonts: Quicksand -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
-        body { font-family: 'Quicksand', sans-serif; scroll-behavior: smooth; overflow-x: hidden; width: 100vw; }
-        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .drag-over { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeIn 0.3s ease-out forwards; }
-        .lightbox-active { overflow: hidden; }
-        .rotating { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            width: 100vw;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        .drag-over {
+            border-color: #3b82f6 !important;
+            background: rgba(59, 130, 246, 0.05) !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .lightbox-active {
+            overflow: hidden;
+        }
+
+        .rotating {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         /* STRICT SQUARE THUMBNAILS */
-        .img-container { width: 100%; aspect-ratio: 1 / 1; position: relative; overflow: hidden; border-radius: 2rem; background: #000; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .img-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 2rem;
+            background: #000;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         /* SLOW SLIDING MARQUEE */
-        .mq-container { width: 100%; overflow: hidden; white-space: nowrap; position: relative; }
-        .mq-content { display: inline-block; min-width: 100%; text-align: center; }
-        .mq-container:hover .mq-content { animation: slide-slow 12s linear infinite; }
+        .mq-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .mq-content {
+            display: inline-block;
+            min-width: 100%;
+            text-align: center;
+        }
+
+        .mq-container:hover .mq-content {
+            animation: slide-slow 12s linear infinite;
+        }
+
         @keyframes slide-slow {
-            0%, 10% { transform: translateX(0); }
-            45%, 55% { transform: translateX(-100%); }
-            90%, 100% { transform: translateX(0); }
+
+            0%,
+            10% {
+                transform: translateX(0);
+            }
+
+            45%,
+            55% {
+                transform: translateX(-100%);
+            }
+
+            90%,
+            100% {
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
+
 <body class="bg-[#0b0f1a] min-h-screen text-slate-200 p-4 md:p-8 flex flex-col items-center">
 
     <!-- UNIVERSAL LIGHTBOX -->
-    <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in">
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
+    <div id="lightbox" onclick="closeLightbox()"
+        class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in">
+        <button onclick="closeLightbox()"
+            class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
         <div class="relative max-w-5xl max-h-[70vh] flex items-center justify-center pointer-events-none">
-            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto">
+            <img id="lightboxImg"
+                class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto">
         </div>
-        <div class="mt-8 text-center bg-slate-900/80 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-800 max-w-sm">
+        <div
+            class="mt-8 text-center bg-slate-900/80 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-800 max-w-sm">
             <p id="lightboxName" class="text-xs font-bold text-white uppercase tracking-widest truncate"></p>
             <p id="lightboxSize" class="text-[10px] text-slate-500 mt-1 font-bold"></p>
         </div>
     </div>
 
     <!-- ERROR REPORT -->
-    <div id="errorReportModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
+    <div id="errorReportModal"
+        class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
         <div class="bg-slate-900 border border-red-500/30 w-full max-w-md rounded-[2.5rem] p-8 text-center shadow-2xl">
             <div class="text-4xl mb-4">💥</div>
-            <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2 text-red-500 italic">Errors Detected</h2>
-            <div id="errorFileList" class="text-[10px] text-slate-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap leading-relaxed"></div>
-            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest">Close</button>
+            <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2 text-red-500 italic">Errors Detected
+            </h2>
+            <div id="errorFileList"
+                class="text-[10px] text-slate-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap leading-relaxed">
+            </div>
+            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')"
+                class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest">Close</button>
         </div>
     </div>
 
     <!-- DUPLICATE ALERT -->
-    <div id="simpleDuplicateModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in">
-        <div class="bg-slate-900 border border-amber-500/30 w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl">
+    <div id="simpleDuplicateModal"
+        class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in">
+        <div
+            class="bg-slate-900 border border-amber-500/30 w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl">
             <div class="text-4xl mb-4 text-amber-500">📑</div>
             <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2 italic">Duplicate Alert</h2>
             <p id="duplicateMsg" class="text-xs text-slate-500 mb-6"></p>
-            <button onclick="document.getElementById('simpleDuplicateModal').classList.add('hidden')" class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest">OK</button>
+            <button onclick="document.getElementById('simpleDuplicateModal').classList.add('hidden')"
+                class="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest">OK</button>
         </div>
     </div>
 
     <!-- MAIN UI -->
     <div id="mainContent" class="max-w-7xl mx-auto w-full flex-grow opacity-0 transition-opacity duration-500">
-        <header class="flex flex-col sm:flex-row justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
+        <header
+            class="flex flex-col sm:flex-row justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
             <div class="text-center sm:text-left">
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
+                <h1
+                    class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">
+                    img2am</h1>
                 <p class="text-slate-600 text-[10px] uppercase tracking-widest font-black mt-1">By long-bora</p>
             </div>
-            <button onclick="resetWorkspace()" class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all tracking-widest">Master Reset</button>
+            <button onclick="resetWorkspace()"
+                class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all tracking-widest">Master
+                Reset</button>
         </header>
 
         <div class="grid lg:grid-cols-12 gap-6 md:gap-10">
             <aside class="lg:col-span-3 space-y-6">
-                <div class="bg-slate-900/40 border border-slate-800/60 rounded-[2rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
+                <div
+                    class="bg-slate-900/40 border border-slate-800/60 rounded-[2rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
                     <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest italic">Settings</h2>
                     <div class="space-y-6">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Format</label>
-                            <select id="formatSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Format</label>
+                            <select id="formatSelect"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
                                 <option value="image/jpeg">JPG</option>
                                 <option value="image/png">PNG</option>
                                 <option value="image/webp">WebP</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Scale</label>
-                            <select id="scaleSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Scale</label>
+                            <select id="scaleSelect"
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none cursor-pointer text-slate-300 font-bold">
                                 <option value="1">1.0x (Original)</option>
                                 <option value="1.5">1.5x</option>
                                 <option value="2.0">2.0x (HD)</option>
@@ -110,45 +238,65 @@
                         </div>
                         <div>
                             <div class="flex justify-between mb-3">
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-tighter italic">Quality</label>
+                                <label
+                                    class="block text-[10px] font-bold text-slate-500 uppercase tracking-tighter italic">Quality</label>
                                 <span id="qualityVal" class="text-[11px] text-blue-400 font-bold">80%</span>
                             </div>
-                            <input type="range" id="qualityRange" min="0.1" max="1.0" step="0.1" value="0.8" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                            <input type="range" id="qualityRange" min="0.1" max="1.0" step="0.1" value="0.8"
+                                class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
                         </div>
                     </div>
-                    <button id="processBtn" disabled class="w-full mt-10 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-900 disabled:text-slate-700 text-white font-bold py-4 rounded-2xl transition-all uppercase text-[11px] tracking-widest shadow-xl">
+                    <button id="processBtn" disabled
+                        class="w-full mt-10 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-900 disabled:text-slate-700 text-white font-bold py-4 rounded-2xl transition-all uppercase text-[11px] tracking-widest shadow-xl">
                         Convert
                     </button>
-                    <p id="convertHelperText" class="text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic hidden">No new images to convert</p>
+                    <p id="convertHelperText"
+                        class="text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic hidden">No new
+                        images to convert</p>
                 </div>
             </aside>
 
             <main class="lg:col-span-9 space-y-10 min-w-0">
-                <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-4 md:p-8 flex flex-col min-h-[450px]">
+                <div id="dropzone"
+                    class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-4 md:p-8 flex flex-col min-h-[450px]">
                     <input type="file" id="imageInput" multiple accept="image/*,.heic,.heif,.dng,.tiff" class="hidden">
-                    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-slate-800/30 pb-6 gap-4">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-slate-800/30 pb-6 gap-4">
                         <div class="text-center sm:text-left">
                             <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Workspace Queue</h3>
-                            <p class="text-[9px] text-slate-600 uppercase mt-1 font-bold tracking-tighter italic">Accepted: JPG • PNG • WEBP • HEIC • DNG • TIFF</p>
+                            <p class="text-[9px] text-slate-600 uppercase mt-1 font-bold tracking-tighter italic">
+                                Accepted: JPG • PNG • WEBP • HEIC • DNG • TIFF</p>
                         </div>
                         <div class="flex items-center gap-4">
-                            <button onclick="clearQueue()" class="text-[10px] text-slate-700 hover:text-red-500 font-black uppercase transition-all">Clear Queue</button>
-                            <span id="queueCount" class="text-[10px] text-slate-500 font-mono bg-slate-900 px-3 py-1 rounded-full border border-slate-800 font-bold tabular-nums">0</span>
+                            <button onclick="clearQueue()"
+                                class="text-[10px] text-slate-700 hover:text-red-500 font-black uppercase transition-all">Clear
+                                Queue</button>
+                            <span id="queueCount"
+                                class="text-[10px] text-slate-500 font-mono bg-slate-900 px-3 py-1 rounded-full border border-slate-800 font-bold tabular-nums">0</span>
                         </div>
                     </div>
-                    <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 flex-grow content-start"></div>
+                    <div id="queueGrid"
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 flex-grow content-start">
+                    </div>
                 </div>
 
                 <!-- PROGRESS AREA -->
-                <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-6 md:p-8 rounded-[3rem] animate-in shadow-2xl relative">
+                <div id="progressContainer"
+                    class="hidden bg-slate-900/50 border border-slate-800 p-6 md:p-8 rounded-[3rem] animate-in shadow-2xl relative">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <div class="flex flex-col items-center sm:items-start min-w-0 w-full">
-                            <span id="statusLabel" class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">Processing Batch</span>
-                            <span id="currentFileName" class="text-[11px] text-slate-500 mt-1 font-bold truncate w-full text-center sm:text-left italic"></span>
+                            <span id="statusLabel"
+                                class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">Processing
+                                Batch</span>
+                            <span id="currentFileName"
+                                class="text-[11px] text-slate-500 mt-1 font-bold truncate w-full text-center sm:text-left italic"></span>
                         </div>
                         <div class="flex items-center gap-4 shrink-0">
-                            <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0 / 0</span>
-                            <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic tracking-tighter">0%</span>
+                            <span id="counterBadge"
+                                class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0
+                                / 0</span>
+                            <span id="statusPercent"
+                                class="text-[14px] font-black text-slate-200 italic tracking-tighter">0%</span>
                         </div>
                     </div>
                     <div class="mb-4">
@@ -156,34 +304,52 @@
                             <span class="text-slate-700 italic">Individual Optimization</span>
                             <span id="fileProgressText" class="text-blue-500">0%</span>
                         </div>
-                        <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden"><div id="fileProgressBar" class="w-0 h-full bg-blue-400 transition-all duration-300"></div></div>
+                        <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden">
+                            <div id="fileProgressBar" class="w-0 h-full bg-blue-400 transition-all duration-300"></div>
+                        </div>
                     </div>
-                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
+                    <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner">
+                        <div id="progressBar"
+                            class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300">
+                        </div>
+                    </div>
                 </div>
 
                 <section id="resultsSection" class="hidden space-y-8 animate-in">
                     <div class="flex flex-col sm:flex-row justify-between items-center px-4 gap-6">
                         <div class="flex items-center gap-4">
-                            <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Converted Images</h2>
-                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Converted</span>
+                            <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Converted
+                                Images</h2>
+                            <span id="totalConvertedLabel"
+                                class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0
+                                Converted</span>
                         </div>
                         <div class="flex gap-4">
-                            <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[10px] uppercase transition-all">Latest</button>
-                            <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[10px] uppercase shadow-lg transition-all">Save All</button>
+                            <button id="downloadLatestBtn"
+                                class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[10px] uppercase transition-all">Latest</button>
+                            <button id="downloadAllBtn"
+                                class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[10px] uppercase shadow-lg transition-all">Save
+                                All</button>
                         </div>
                     </div>
-                    <div id="resultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 p-4 md:p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]"></div>
+                    <div id="resultsGrid"
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 p-4 md:p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]">
+                    </div>
                 </section>
             </main>
         </div>
     </div>
 
     <!-- FOOTER -->
-    <footer id="footer" class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center text-slate-600 opacity-0 transition-opacity gap-4">
+    <footer id="footer"
+        class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center text-slate-600 opacity-0 transition-opacity gap-4">
         <p class="text-[10px] font-bold uppercase tracking-[0.3em]">© <span id="copyYear"></span> img2am • long-bora</p>
-        <div id="vBox" class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60">
-            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
-            <span id="vCount" class="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">---</span>
+        <div id="vBox"
+            class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60">
+            <span
+                class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+            <span id="vCount"
+                class="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">---</span>
         </div>
     </footer>
 
@@ -191,8 +357,8 @@
         /**
          * MASTER CONFIG
          */
-        const _0x_d = "{{ALLOWED_DOMAIN}}"; 
-        const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
+        const _0x_d = "{{ALLOWED_DOMAIN}}";
+        const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ==";
         const _p = ["https://", "api.", "counterapi", ".dev/v1/", "/visits/up"];
 
         let workspaceFiles = []; let convertedRegistry = []; let latestProcessedIds = [];
@@ -201,19 +367,19 @@
         const formatSize = (b) => !b ? '0 B' : parseFloat((b / Math.pow(1024, Math.floor(Math.log(b) / Math.log(1024)))).toFixed(1)) + ' ' + ['B', 'KB', 'MB', 'GB'][Math.floor(Math.log(b) / Math.log(1024))];
         const getMeta = (f) => `${f.name}-${f.size}-${f.lastModified}`;
 
-        window.onload = function() {
+        window.onload = function () {
             const h = window.location.hostname;
             document.getElementById('copyYear').innerText = new Date().getFullYear();
             if (h === _0x_d || h === "localhost" || h === "127.0.0.1" || h.includes("github.io") || h === "www." + _0x_d) {
                 document.getElementById('mainContent').classList.remove('opacity-0');
                 document.getElementById('footer').classList.remove('opacity-0');
                 initApp();
-                const url = _p[0]+_p[1]+_p[2]+_p[3]+atob(_0x_a)+_p[4];
-                fetch(url).then(r=>r.json()).then(d=>{
+                const url = _p[0] + _p[1] + _p[2] + _p[3] + atob(_0x_a) + _p[4];
+                fetch(url).then(r => r.json()).then(d => {
                     document.getElementById('vCount').innerText = "VISITOR: " + d.count.toLocaleString();
                 }).catch(() => document.getElementById('vCount').innerText = "VISITOR: ONLINE");
             } else {
-                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>License restricted to "+_0x_d+"</p></div>";
+                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>License restricted to " + _0x_d + "</p></div>";
             }
         };
 
@@ -237,7 +403,7 @@
 
             incoming.forEach(f => {
                 const ext = f.name.split('.').pop().toLowerCase();
-                if(!supported.includes(ext)) return;
+                if (!supported.includes(ext)) return;
                 if (workspaceFiles.some(x => getMeta(x.file) === getMeta(f))) { dupCount++; }
                 else { workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: f, status: 'pending', previewUrl: '', rotation: 0 }); }
             });
@@ -248,7 +414,7 @@
             }
             document.getElementById('imageInput').value = '';
             updateUI();
-            if(!isLoaderActive) runLoader();
+            if (!isLoaderActive) runLoader();
         }
 
         async function runLoader() {
@@ -257,7 +423,7 @@
                 if (!f.previewUrl) {
                     f.previewUrl = await genT(f.file);
                     const img = document.getElementById(`prev-${f.id}`);
-                    if(img) { img.src = f.previewUrl; img.onload = () => img.classList.remove('opacity-0'); }
+                    if (img) { img.src = f.previewUrl; img.onload = () => img.classList.remove('opacity-0'); }
                 }
             }
             isLoaderActive = false;
@@ -277,7 +443,7 @@
             const f = workspaceFiles.find(x => x.id === id);
             f.rotation = (f.rotation + (dir === 'right' ? 90 : -90)) % 360;
             const img = document.getElementById(`prev-${id}`);
-            if(img) img.style.transform = `rotate(${f.rotation}deg)`;
+            if (img) img.style.transform = `rotate(${f.rotation}deg)`;
         }
 
         function updateUI() {
@@ -289,7 +455,7 @@
                 card.className = "flex flex-col cursor-pointer shadow-2xl animate-in group relative";
                 card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
                 let dot = f.status === 'converted' ? 'bg-emerald-500' : (f.status === 'error' ? 'bg-red-500' : 'bg-orange-500');
-                
+
                 card.innerHTML = `
                     <div class="img-container">
                         <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating ${f.previewUrl ? '' : 'opacity-0'}">
@@ -311,9 +477,9 @@
             ghost.onclick = () => document.getElementById('imageInput').click();
             grid.appendChild(ghost);
 
-            const pending = workspaceFiles.filter(x=>x.status==='pending').length;
+            const pending = workspaceFiles.filter(x => x.status === 'pending').length;
             document.getElementById('queueCount').innerText = workspaceFiles.length;
-            document.getElementById('counterBadge').innerText = `${workspaceFiles.filter(x=>x.status==='converted').length} / ${workspaceFiles.length}`;
+            document.getElementById('counterBadge').innerText = `${workspaceFiles.filter(x => x.status === 'converted').length} / ${workspaceFiles.length}`;
             document.getElementById('totalConvertedLabel').innerText = `${convertedRegistry.length} Converted`;
             document.getElementById('processBtn').disabled = pending === 0;
             document.getElementById('convertHelperText').className = (workspaceFiles.length > 0 && pending === 0) ? "text-[9px] text-center mt-3 text-slate-600 uppercase font-bold italic" : "hidden";
@@ -346,26 +512,26 @@
                         b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
                     }
 
-                    const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
+                    const comp = await imageCompression(new File([b], f.file.name, { type: format }), {
                         maxSizeMB: 10, maxWidthOrHeight: 10000,
                         onProgress: (p) => {
-                            document.getElementById('fileProgressBar').style.width = p+'%';
-                            document.getElementById('fileProgressText').innerText = p+'%';
+                            document.getElementById('fileProgressBar').style.width = p + '%';
+                            document.getElementById('fileProgressText').innerText = p + '%';
                             const overall = Math.round(((done - 1) / targets.length) * 100 + (p / targets.length));
-                            document.getElementById('progressBar').style.width = overall+'%';
-                            document.getElementById('statusPercent').innerText = overall+'%';
+                            document.getElementById('progressBar').style.width = overall + '%';
+                            document.getElementById('statusPercent').innerText = overall + '%';
                         }
                     });
-                    
+
                     const bit = await createImageBitmap(comp);
-                    
+
                     // MOBILE SAFETY LAYER: Check Megapixel Limit (MAX ~18MP for stability)
                     let scale = scaleSetting;
                     const isPortrait = Math.abs(f.rotation) === 90 || Math.abs(f.rotation) === 270;
                     const w = bit.width * scale;
                     const h = bit.height * scale;
                     const mp = (w * h) / 1000000;
-                    
+
                     // Most mobile devices top out at 16-20MP in canvas. Let's cap at 18MP.
                     if (mp > 18) {
                         scale = Math.sqrt(18000000 / (bit.width * bit.height));
@@ -375,35 +541,35 @@
                     const ctx = canvas.getContext('2d', { alpha: false });
                     const sw = bit.width * scale;
                     const sh = bit.height * scale;
-                    
+
                     canvas.width = isPortrait ? sh : sw;
                     canvas.height = isPortrait ? sw : sh;
-                    
+
                     ctx.fillStyle = "#000";
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.translate(canvas.width / 2, canvas.height / 2);
                     ctx.rotate((f.rotation * Math.PI) / 180);
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(bit, -sw / 2, -sh / 2, sw, sh);
-                    
+
                     const final = await new Promise(r => canvas.toBlob(r, format, quality));
                     const name = `${f.file.name.split('.').slice(0, -1).join('.')}_${f.id}_final.${ext}`;
-                    
+
                     // Memory Flush
                     canvas.width = 0; canvas.height = 0;
-                    
+
                     f.status = 'converted';
                     convertedRegistry.push({ name, blob: final, id: f.id });
                     latestProcessedIds.push(f.id);
                     appendR(final, name);
                     updateUI();
-                } catch (e) { 
-                    f.status = 'error'; 
-                    errors.push(f.file.name + " (Reason: Resolution too high for device memory)"); 
-                    updateUI(); 
+                } catch (e) {
+                    f.status = 'error';
+                    errors.push(f.file.name + " (Reason: Resolution too high for device memory)");
+                    updateUI();
                 }
             }
-            if(errors.length > 0) {
+            if (errors.length > 0) {
                 document.getElementById('errorFileList').innerText = errors.join('\n');
                 document.getElementById('errorReportModal').classList.remove('hidden');
             }
@@ -435,11 +601,12 @@
         window.removeFile = (id) => { workspaceFiles = workspaceFiles.filter(f => f.id !== id); updateUI(); };
         window.clearQueue = () => { workspaceFiles = []; updateUI(); };
         window.resetWorkspace = () => { workspaceFiles = []; convertedRegistry = []; document.getElementById('resultsGrid').innerHTML = ''; document.getElementById('resultsSection').classList.add('hidden'); document.getElementById('progressContainer').classList.add('hidden'); updateUI(); };
-        window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').classList.remove('hidden'); document.body.classList.add('lightbox-active'); };
+        window.openLightbox = (url, n, s) => { if (!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').classList.remove('hidden'); document.body.classList.add('lightbox-active'); };
         window.closeLightbox = () => { document.getElementById('lightbox').classList.add('hidden'); document.body.classList.remove('lightbox-active'); };
-        
-        document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_collection.zip`; l.click(); };
-        document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_batch.zip`; l.click(); };
+
+        document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({ type: "blob" }); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_collection.zip`; l.click(); };
+        document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({ type: "blob" }); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_batch.zip`; l.click(); };
     </script>
 </body>
+
 </html>
