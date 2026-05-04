@@ -27,10 +27,10 @@
         .lightbox-active { overflow: hidden; }
         .rotating { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* FIXED MARQUEE SYSTEM */
-        .marquee-box { width: 100%; overflow: hidden; white-space: nowrap; position: relative; }
-        .marquee-text { display: inline-block; transition: transform 0.5s ease-in-out; }
-        .marquee-box:hover .marquee-text { animation: marquee-scroll 10s linear infinite; }
+        /* MARQUEE SYSTEM (Applied to long filenames) */
+        .marquee-wrapper { width: 100%; overflow: hidden; white-space: nowrap; position: relative; }
+        .marquee-content { display: inline-block; padding-left: 0; transition: transform 0.2s linear; }
+        .marquee-wrapper:hover .marquee-content { animation: marquee-scroll 10s linear infinite; }
         @keyframes marquee-scroll {
             0% { transform: translateX(0); }
             10% { transform: translateX(0); }
@@ -45,7 +45,7 @@
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
         <div class="relative max-w-5xl max-h-[70vh] flex items-center justify-center pointer-events-none">
-            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto">
+            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto cursor-default">
         </div>
         <div class="mt-8 text-center bg-slate-900/80 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-800 max-w-sm">
             <p id="lightboxName" class="text-xs font-bold text-white uppercase tracking-widest truncate"></p>
@@ -53,13 +53,14 @@
         </div>
     </div>
 
-    <!-- ERROR REPORT -->
+    <!-- ERROR REPORT MODAL -->
     <div id="errorReportModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
         <div class="bg-slate-900 border border-red-500/30 w-full max-w-md rounded-[2.5rem] p-8 text-center shadow-2xl">
             <div class="text-4xl mb-4">💥</div>
             <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2">Processing Errors</h2>
+            <p class="text-[10px] text-slate-500 mb-6 uppercase">The following files could not be converted:</p>
             <div id="errorFileList" class="text-xs text-red-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap"></div>
-            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close</button>
+            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close Report</button>
         </div>
     </div>
 
@@ -166,12 +167,12 @@
                     <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
                 </div>
 
-                <!-- CONVERTED IMAGES SECTION -->
+                <!-- RESULTS GALLERY -->
                 <section id="resultsSection" class="hidden space-y-8 animate-in">
                     <div class="flex flex-col sm:flex-row justify-between items-center px-4 gap-6">
                         <div class="flex items-center gap-4">
                             <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Converted Images</h2>
-                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Files</span>
+                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Converted</span>
                         </div>
                         <div class="flex gap-4">
                             <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest transition-all">Latest</button>
@@ -195,7 +196,7 @@
 
     <script>
         /**
-         * img2am MASTER LOGIC - BY LONG BORA
+         * img2am - MASTER LOGIC BY LONG BORA
          */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
@@ -219,7 +220,7 @@
                     document.getElementById('vCount').innerText = "VISITOR: " + d.count.toLocaleString();
                 }).catch(() => document.getElementById('vCount').innerText = "VISITOR: ONLINE");
             } else {
-                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Unauthorized Domain</h1><p>License restricted to "+_0x_d+"</p></div>";
+                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>License restricted to "+_0x_d+"</p></div>";
             }
         };
 
@@ -237,13 +238,26 @@
         }
 
         async function handleFiles(files) {
-            Array.from(files).forEach(f => {
-                const supported = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'dng', 'tiff'];
-                const ext = f.name.split('.').pop().toLowerCase();
+            const incoming = Array.from(files);
+            const duplicates = [];
+            const fresh = [];
+            const supported = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'dng', 'tiff'];
+
+            incoming.forEach(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
                 if(!supported.includes(ext)) return;
-                if (workspaceFiles.some(x => getMeta(x.file) === getMeta(f))) duplicates.push(f);
-                else workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: f, status: 'pending', previewUrl: '', rotation: 0 });
+                if (workspaceFiles.some(f => getMeta(f.file) === getMeta(file))) duplicates.push(file);
+                else fresh.push(file);
             });
+
+            fresh.forEach(f => {
+                workspaceFiles.push({ id: Math.random().toString(36).substr(2, 9), file: f, status: 'pending', previewUrl: '', rotation: 0 });
+            });
+            
+            if (duplicates.length > 0) {
+                pendingDuplicates = duplicates;
+                showDuplicateModal();
+            }
             document.getElementById('imageInput').value = '';
             updateUI();
             if(!isLoaderActive) runLoader();
@@ -284,11 +298,12 @@
             workspaceFiles.forEach(f => {
                 const card = document.createElement('div');
                 card.id = `card-${f.id}`;
-                card.className = "relative bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
+                card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
                 card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
                 let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (f.status === 'error' ? 'bg-red-500' : 'bg-orange-500');
+                
                 card.innerHTML = `
-                    <div class="aspect-square flex items-center justify-center p-3 relative overflow-hidden">
+                    <div class="aspect-square flex items-center justify-center p-4 relative overflow-hidden">
                         <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
                         <div class="absolute inset-0 bg-blue-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-white italic">Preview</span></div>
                         <span class="absolute bottom-4 right-4 bg-slate-950/80 text-[7px] text-slate-300 px-2 py-0.5 rounded-full font-bold tabular-nums font-mono tracking-tighter">${formatSize(f.file.size)}</span>
@@ -299,8 +314,8 @@
                         <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">↻</button>
                         <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">✕</button>
                     </div>
-                    <div class="pt-1 pb-4 px-4 bg-slate-950 marquee-box">
-                        <div class="marquee-text text-[8px] text-slate-600 uppercase font-bold italic tracking-widest text-center">${f.file.name}</div>
+                    <div class="pt-1 pb-5 px-6 bg-slate-950 marquee-wrapper">
+                        <div class="marquee-content text-[8px] text-slate-600 uppercase font-bold italic tracking-widest text-center">${f.file.name}</div>
                     </div>`;
                 grid.appendChild(card);
             });
@@ -324,9 +339,11 @@
             const scale = parseFloat(document.getElementById('scaleSelect').value);
             const targets = workspaceFiles.filter(f => f.status === 'pending');
             const ext = format === 'image/jpeg' ? 'jpg' : format.split('/')[1];
+
             document.getElementById('progressContainer').classList.remove('hidden');
             document.getElementById('resultsSection').classList.remove('hidden');
             latestProcessedIds = []; let done = 0; let errors = [];
+
             for (let f of targets) {
                 done++;
                 document.getElementById('currentFileName').innerText = f.file.name;
@@ -343,6 +360,7 @@
                         cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer), cvs.width, cvs.height), 0, 0);
                         b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
                     }
+
                     const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
                         maxSizeMB: 10, maxWidthOrHeight: 10000,
                         onProgress: (p) => {
@@ -353,6 +371,7 @@
                             document.getElementById('statusPercent').innerText = overall+'%';
                         }
                     });
+                    
                     const bit = await createImageBitmap(comp);
                     const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
                     const isP = Math.abs(f.rotation) === 90 || Math.abs(f.rotation) === 270;
@@ -360,6 +379,7 @@
                     cvs.width = isP ? h : w; cvs.height = isP ? w : h;
                     ctx.translate(cvs.width / 2, cvs.height / 2); ctx.rotate((f.rotation * Math.PI) / 180);
                     ctx.imageSmoothingQuality = 'high'; ctx.drawImage(bit, -w / 2, -h / 2, w, h);
+                    
                     const final = await new Promise(r => cvs.toBlob(r, format, quality));
                     const baseName = f.file.name.split('.').slice(0, -1).join('.') || 'captured';
                     const name = `${baseName}_${f.id}_final.${ext}`;
@@ -374,26 +394,26 @@
                 document.getElementById('errorFileList').innerText = errors.join('\n');
                 document.getElementById('errorReportModal').classList.remove('hidden');
             }
-            document.getElementById('statusLabel').innerText = "Synthesized";
+            document.getElementById('statusLabel').innerText = "All Files Synthesized";
             document.getElementById('progressBar').style.width = '100%';
             document.getElementById('statusPercent').innerText = '100%';
-            processBtn.disabled = false;
+            document.getElementById('processBtn').disabled = false;
         }
 
         function appendR(b, n) {
             const url = URL.createObjectURL(b);
             const grid = document.getElementById('resultsGrid');
             const card = document.createElement('div');
-            card.className = "relative bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-in flex flex-col group cursor-pointer shadow-2xl";
+            card.className = "relative aspect-square bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-in flex flex-col group cursor-pointer shadow-2xl";
             card.onclick = () => openLightbox(url, n, formatSize(b.size));
             card.innerHTML = `
-                <div class="aspect-square bg-black flex items-center justify-center p-3 relative overflow-hidden">
+                <div class="aspect-square flex items-center justify-center p-3 relative overflow-hidden bg-black">
                     <img src="${url}" class="w-full h-full object-cover rounded-[2rem]">
                     <div class="absolute inset-0 bg-emerald-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-slate-950 italic tracking-widest">Preview</span></div>
                     <span class="absolute bottom-4 right-4 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono tracking-tighter">${formatSize(b.size)}</span>
                 </div>
-                <div class="pt-2 pb-5 px-4 bg-slate-950 flex flex-col gap-4 overflow-hidden">
-                    <div class="marquee-box"><div class="marquee-text text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div></div>
+                <div class="pt-2 pb-5 px-6 bg-slate-950 flex flex-col gap-3 overflow-hidden">
+                    <div class="marquee-wrapper"><div class="marquee-content text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div></div>
                     <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center transition-all shadow-lg">Save Image</a>
                 </div>`;
             grid.appendChild(card);
@@ -407,9 +427,9 @@
                 const item = document.createElement('div');
                 item.className = "bg-slate-950 p-4 rounded-[1.5rem] border border-slate-800 flex flex-col items-center gap-3 relative cursor-pointer group";
                 item.innerHTML = `<div class="aspect-square w-full bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
-                    <img id="dup-img-${index}" class="w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                    <img id="dup-img-${index}" class="dup-img w-full h-full object-cover opacity-0 transition-opacity duration-700">
                     <div class="absolute inset-0 bg-amber-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[8px] font-black uppercase text-white">Preview</span></div>
-                </div><div class="marquee-box"><div class="marquee-text text-[8px] text-slate-500 text-center font-bold uppercase tracking-tighter font-mono">${file.name}</div></div>`;
+                </div><div class="marquee-wrapper"><div class="marquee-content text-[8px] text-slate-500 text-center font-bold uppercase tracking-tighter font-mono">${file.name}</div></div>`;
                 list.appendChild(item);
                 const reader = new FileReader();
                 reader.onload = (e) => {
