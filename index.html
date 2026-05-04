@@ -169,7 +169,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-center px-4 gap-6">
                         <div class="flex items-center gap-4">
                             <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Converted Images</h2>
-                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Files</span>
+                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Converted</span>
                         </div>
                         <div class="flex gap-4">
                             <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest transition-all">Latest</button>
@@ -192,10 +192,6 @@
     </footer>
 
     <script>
-        /**
-         * img2am MASTER LOGIC - BY LONG BORA
-         * SECURITY: Domain Lock + Segmented API
-         */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
         const _p = ["https://", "api.", "counterapi", ".dev/v1/", "/visits/up"];
@@ -209,7 +205,6 @@
         window.onload = function() {
             const h = window.location.hostname;
             document.getElementById('copyYear').innerText = new Date().getFullYear();
-
             if (h === _0x_d || h === "localhost" || h === "127.0.0.1" || h.includes("github.io") || h === "www." + _0x_d) {
                 document.getElementById('mainContent').classList.remove('opacity-0');
                 document.getElementById('footer').classList.remove('opacity-0');
@@ -226,13 +221,11 @@
         function initApp() {
             document.getElementById('qualityRange').oninput = (e) => document.getElementById('qualityVal').innerText = Math.round(e.target.value * 100) + "%";
             document.addEventListener('keydown', (e) => e.key === 'Escape' && closeLightbox());
-            
             const dz = document.getElementById('dropzone');
             dz.addEventListener('dragenter', (e) => { e.preventDefault(); dz.classList.add('drag-over'); });
             dz.addEventListener('dragover', (e) => e.preventDefault());
             dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
             dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
-            
             document.getElementById('imageInput').onchange = (e) => handleFiles(e.target.files);
             document.getElementById('processBtn').onclick = executeConversion;
             updateUI();
@@ -289,7 +282,6 @@
                 card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
                 card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
                 let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (f.status === 'error' ? 'bg-red-500' : 'bg-orange-500');
-                
                 card.innerHTML = `
                     <div class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
                         <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
@@ -298,8 +290,8 @@
                         <div class="absolute top-4 left-4 w-2.5 h-2.5 rounded-full transition-all ${dot}"></div>
                     </div>
                     <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','left')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↺</button>
-                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↻</button>
+                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','left')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">↺</button>
+                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">↻</button>
                         <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">✕</button>
                     </div>
                     <div class="p-2 bg-slate-950 px-3 marquee-wrapper">
@@ -312,7 +304,6 @@
             ghost.innerHTML = `<span class="text-3xl group-hover:scale-110 transition-transform">+</span>`;
             ghost.onclick = () => document.getElementById('imageInput').click();
             grid.appendChild(ghost);
-
             const pending = workspaceFiles.filter(x=>x.status==='pending').length;
             document.getElementById('queueCount').innerText = workspaceFiles.length;
             document.getElementById('counterBadge').innerText = `${workspaceFiles.filter(x=>x.status==='converted').length} / ${workspaceFiles.length}`;
@@ -327,11 +318,9 @@
             const scale = parseFloat(document.getElementById('scaleSelect').value);
             const targets = workspaceFiles.filter(f => f.status === 'pending');
             const ext = format === 'image/jpeg' ? 'jpg' : format.split('/')[1];
-
             document.getElementById('progressContainer').classList.remove('hidden');
             document.getElementById('resultsSection').classList.remove('hidden');
             latestProcessedIds = []; let done = 0; let errors = [];
-
             for (let f of targets) {
                 done++;
                 document.getElementById('currentFileName').innerText = f.file.name;
@@ -343,12 +332,10 @@
                     }
                     if (f.file.name.match(/\.(dng|tiff)$/i)) {
                         const ab = await f.file.arrayBuffer(); const ifds = UTIF.decode(ab); UTIF.decodeImage(ab, ifds[0]);
-                        const rgba = UTIF.toRGBA8(ifds[0]);
                         const cvs = document.createElement('canvas'); cvs.width = ifds[0].width; cvs.height = ifds[0].height;
-                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer), cvs.width, cvs.height), 0, 0);
+                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(UTIF.toRGBA8(ifds[0]).buffer), cvs.width, cvs.height), 0, 0);
                         b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
                     }
-
                     const comp = await imageCompression(new File([b], f.file.name, {type: format}), {
                         maxSizeMB: 10, maxWidthOrHeight: 10000,
                         onProgress: (p) => {
@@ -359,7 +346,6 @@
                             document.getElementById('statusPercent').innerText = overall+'%';
                         }
                     });
-                    
                     const bit = await createImageBitmap(comp);
                     const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
                     const isP = Math.abs(f.rotation) === 90 || Math.abs(f.rotation) === 270;
@@ -367,9 +353,12 @@
                     cvs.width = isP ? h : w; cvs.height = isP ? w : h;
                     ctx.translate(cvs.width / 2, cvs.height / 2); ctx.rotate((f.rotation * Math.PI) / 180);
                     ctx.imageSmoothingQuality = 'high'; ctx.drawImage(bit, -w / 2, -h / 2, w, h);
-                    
                     const final = await new Promise(r => cvs.toBlob(r, format, quality));
-                    const name = `${f.file.name.split('.')[0]}_final.${ext}`;
+                    
+                    // FIX: UNIQUE FILENAME FOR ZIP (Captures ID to avoid camera image conflict)
+                    const baseName = f.file.name.split('.').slice(0, -1).join('.') || 'captured';
+                    const name = `${baseName}_${f.id}_final.${ext}`;
+                    
                     f.status = 'converted';
                     convertedRegistry.push({ name, blob: final, id: f.id });
                     latestProcessedIds.push(f.id);
@@ -399,9 +388,7 @@
                     <span class="absolute bottom-4 right-4 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono tracking-tighter">${formatSize(b.size)}</span>
                 </div>
                 <div class="p-5 bg-slate-950 flex flex-col gap-4 overflow-hidden">
-                    <div class="marquee-wrapper">
-                        <div class="marquee-content text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div>
-                    </div>
+                    <div class="marquee-wrapper"><div class="marquee-content text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div></div>
                     <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center transition-all shadow-lg">Save Image</a>
                 </div>`;
             grid.appendChild(card);
