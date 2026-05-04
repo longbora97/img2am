@@ -38,7 +38,8 @@
 
     <!-- Google Ads -->
     <meta name="google-adsense-account" content="ca-pub-2304297939246888">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2304297939246888" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2304297939246888"
+        crossorigin="anonymous"></script>
 
     <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
@@ -341,6 +342,29 @@
                     </div>
                 </section>
             </main>
+        </div>
+    </div>
+
+    <!-- LEGAL SECTION -->
+    <div class="mt-8 flex justify-center gap-6 text-[10px] uppercase font-bold tracking-widest text-slate-500">
+        <button onclick="openLegal('privacy')"
+            class="hover:text-blue-400 transition-colors underline decoration-slate-800 underline-offset-4">Privacy
+            Policy</button>
+        <button onclick="openLegal('terms')"
+            class="hover:text-blue-400 transition-colors underline decoration-slate-800 underline-offset-4">Terms of
+            Service</button>
+    </div>
+
+    <!-- LEGAL MODAL -->
+    <div id="legalModal" onclick="closeLegal()"
+        class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in cursor-pointer">
+        <div onclick="event.stopPropagation()"
+            class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-[2.5rem] p-8 max-h-[80vh] overflow-y-auto custom-scroll cursor-default">
+            <div id="legalContent" class="text-xs text-slate-400 leading-relaxed space-y-4">
+                <!-- Content Injected by JS -->
+            </div>
+            <button onclick="closeLegal()"
+                class="mt-8 w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest">Close</button>
         </div>
     </div>
 
