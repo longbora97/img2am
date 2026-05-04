@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>img2am - By Long Bora</title>
     
     <!-- FAVICON (Option 4: Abstract A) -->
@@ -18,7 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
-        body { font-family: 'Quicksand', sans-serif; scroll-behavior: smooth; }
+        body { font-family: 'Quicksand', sans-serif; scroll-behavior: smooth; overflow-x: hidden; width: 100vw; }
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .drag-over { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
@@ -26,30 +26,38 @@
         .animate-in { animation: fadeIn 0.3s ease-out forwards; }
         .lightbox-active { overflow: hidden; }
         .rotating { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .aspect-square-thumb { aspect-ratio: 1 / 1; object-fit: cover; }
+
+        /* MARQUEE SYSTEM */
+        .marquee-wrapper { width: 100%; overflow: hidden; position: relative; white-space: nowrap; }
+        .marquee-content { display: inline-block; padding-left: 0; transition: transform 0.1s linear; }
+        .marquee-wrapper:hover .marquee-content { animation: marquee-scroll 8s linear infinite; }
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
     </style>
 </head>
-<body class="bg-[#0b0f1a] min-h-screen text-slate-200 p-4 md:p-8 flex flex-col">
+<body class="bg-[#0b0f1a] min-h-screen text-slate-200 p-4 md:p-8 flex flex-col items-center">
 
     <!-- UNIVERSAL LIGHTBOX -->
     <div id="lightbox" onclick="closeLightbox()" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in">
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 font-bold">✕</button>
         <div class="relative max-w-5xl max-h-[70vh] flex items-center justify-center pointer-events-none">
-            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto cursor-default">
+            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl pointer-events-auto">
         </div>
-        <div class="mt-8 text-center bg-slate-900/80 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-800">
-            <p id="lightboxName" class="text-xs font-bold text-white uppercase tracking-widest"></p>
+        <div class="mt-8 text-center bg-slate-900/80 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-800 max-w-sm">
+            <p id="lightboxName" class="text-xs font-bold text-white uppercase tracking-widest truncate"></p>
             <p id="lightboxSize" class="text-[10px] text-slate-500 mt-1 font-bold"></p>
         </div>
     </div>
 
-    <!-- ERROR REPORT MODAL -->
+    <!-- ERROR REPORT -->
     <div id="errorReportModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
         <div class="bg-slate-900 border border-red-500/30 w-full max-w-md rounded-[2.5rem] p-8 text-center shadow-2xl">
             <div class="text-4xl mb-4">💥</div>
             <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2">Processing Errors</h2>
             <div id="errorFileList" class="text-xs text-red-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap"></div>
-            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close Report</button>
+            <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close</button>
         </div>
     </div>
 
@@ -70,20 +78,20 @@
     </div>
 
     <!-- MAIN UI -->
-    <div id="mainContent" class="max-w-7xl mx-auto w-full flex-grow opacity-0 transition-opacity duration-500">
+    <div id="mainContent" class="max-w-7xl mx-auto w-full flex-grow opacity-0 transition-opacity duration-500 overflow-x-hidden">
         <header class="flex flex-col sm:flex-row justify-between items-center mb-10 border-b border-slate-800/40 pb-8 gap-4">
-            <div>
+            <div class="text-center sm:text-left">
                 <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent tracking-tighter italic">img2am</h1>
                 <p class="text-slate-600 text-[10px] uppercase tracking-widest font-black mt-1">By long-bora</p>
             </div>
             <button onclick="resetWorkspace()" class="text-[10px] text-red-500/70 hover:text-red-400 font-bold uppercase border border-red-500/20 px-6 py-2.5 rounded-full transition-all tracking-widest">Master Reset</button>
         </header>
 
-        <div class="grid lg:grid-cols-12 gap-10">
+        <div class="grid lg:grid-cols-12 gap-6 md:gap-10">
             <!-- SIDEBAR -->
             <aside class="lg:col-span-3 space-y-6">
                 <div class="bg-slate-900/40 border border-slate-800/60 rounded-[2rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
-                    <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest italic">Configuration</h2>
+                    <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest italic">Settings</h2>
                     <div class="space-y-6">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-3 uppercase tracking-tighter italic">Format</label>
@@ -118,11 +126,11 @@
             </aside>
 
             <!-- WORKSPACE -->
-            <main class="lg:col-span-9 space-y-10">
-                <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-8 flex flex-col min-h-[450px]">
+            <main class="lg:col-span-9 space-y-10 min-w-0">
+                <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-4 md:p-8 flex flex-col min-h-[450px]">
                     <input type="file" id="imageInput" multiple accept="image/*,.heic,.heif,.dng,.tiff" class="hidden">
-                    <div class="flex justify-between items-center mb-8 border-b border-slate-800/30 pb-6">
-                        <div class="flex flex-col">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-slate-800/30 pb-6 gap-4">
+                        <div class="text-center sm:text-left">
                             <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Workspace Queue</h3>
                             <p class="text-[9px] text-slate-600 uppercase mt-1 font-bold tracking-tighter italic">Accepted: JPG • PNG • WEBP • HEIC • DNG • TIFF</p>
                         </div>
@@ -131,17 +139,17 @@
                             <span id="queueCount" class="text-[10px] text-slate-500 font-mono bg-slate-900 px-3 py-1 rounded-full border border-slate-800 font-bold tabular-nums">0</span>
                         </div>
                     </div>
-                    <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 flex-grow content-start"></div>
+                    <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 flex-grow content-start"></div>
                 </div>
 
                 <!-- PROGRESS AREA -->
-                <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-8 rounded-[3rem] animate-in shadow-2xl relative">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex flex-col">
+                <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-6 md:p-8 rounded-[3rem] animate-in shadow-2xl relative">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                        <div class="flex flex-col items-center sm:items-start min-w-0 w-full">
                             <span id="statusLabel" class="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em]">Processing Batch</span>
-                            <span id="currentFileName" class="text-[11px] text-slate-500 mt-1 font-bold truncate max-w-[200px]"></span>
+                            <span id="currentFileName" class="text-[11px] text-slate-500 mt-1 font-bold truncate w-full text-center sm:text-left"></span>
                         </div>
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-4 shrink-0">
                             <span id="counterBadge" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black tabular-nums shadow-lg">0 / 0</span>
                             <span id="statusPercent" class="text-[14px] font-black text-slate-200 italic tracking-tighter">0%</span>
                         </div>
@@ -156,27 +164,27 @@
                     <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
                 </div>
 
-                <!-- RESULTS (Renamed Header + Fixed Square Layout) -->
+                <!-- RESULTS GALLERY -->
                 <section id="resultsSection" class="hidden space-y-8 animate-in">
-                    <div class="flex justify-between items-end px-4 gap-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-center px-4 gap-6">
                         <div class="flex items-center gap-4">
                             <h2 class="text-sm font-black text-emerald-500 italic uppercase tracking-widest">Converted Images</h2>
-                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Converted</span>
+                            <span id="totalConvertedLabel" class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 tabular-nums uppercase">0 Files</span>
                         </div>
                         <div class="flex gap-4">
                             <button id="downloadLatestBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest transition-all">Latest</button>
                             <button id="downloadAllBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-[10px] uppercase tracking-widest shadow-lg transition-all">Save All</button>
                         </div>
                     </div>
-                    <div id="resultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]"></div>
+                    <div id="resultsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 p-4 md:p-8 bg-slate-900/5 border border-slate-800 rounded-[3.5rem]"></div>
                 </section>
             </main>
         </div>
     </div>
 
     <!-- FOOTER -->
-    <footer id="footer" class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex justify-between items-center text-slate-600 opacity-0 transition-opacity">
-        <p class="text-[10px] font-bold uppercase tracking-[0.3em]">© <span id="copyYear"></span> img2am • long-bora</p>
+    <footer id="footer" class="max-w-7xl mx-auto w-full mt-12 mb-8 border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center text-slate-600 opacity-0 transition-opacity gap-4">
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-center sm:text-left">© <span id="copyYear"></span> img2am • long-bora</p>
         <div id="vBox" class="flex items-center gap-3 bg-slate-900/40 px-4 py-2 rounded-full border border-slate-800/60">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
             <span id="vCount" class="text-[10px] font-mono font-black text-slate-400 tracking-widest uppercase">---</span>
@@ -186,6 +194,7 @@
     <script>
         /**
          * img2am MASTER LOGIC - BY LONG BORA
+         * SECURITY: Domain Lock + Segmented API
          */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
@@ -207,8 +216,8 @@
                 initApp();
                 const url = _p[0]+_p[1]+_p[2]+_p[3]+atob(_0x_a)+_p[4];
                 fetch(url).then(r=>r.json()).then(d=>{
-                    document.getElementById('vCount').innerText = d.count.toLocaleString() + " HITS";
-                }).catch(() => document.getElementById('vCount').innerText = "ONLINE");
+                    document.getElementById('vCount').innerText = "VISITOR: " + d.count.toLocaleString();
+                }).catch(() => document.getElementById('vCount').innerText = "VISITOR: ONLINE");
             } else {
                 document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Unauthorized Domain</h1><p>License restricted to "+_0x_d+"</p></div>";
             }
@@ -280,6 +289,7 @@
                 card.className = "relative aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 animate-in group flex flex-col cursor-pointer shadow-2xl";
                 card.onclick = () => openLightbox(f.previewUrl, f.file.name, formatSize(f.file.size));
                 let dot = f.status === 'converted' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (f.status === 'error' ? 'bg-red-500' : 'bg-orange-500');
+                
                 card.innerHTML = `
                     <div class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
                         <img id="prev-${f.id}" src="${f.previewUrl}" style="transform: rotate(${f.rotation}deg)" class="rotating w-full h-full object-cover rounded-3xl ${f.previewUrl ? '' : 'opacity-0'}">
@@ -292,7 +302,9 @@
                         <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold">↻</button>
                         <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">✕</button>
                     </div>
-                    <div class="p-2 text-[8px] truncate text-center text-slate-600 bg-slate-950 uppercase font-black tracking-widest italic">${f.file.name}</div>`;
+                    <div class="p-2 bg-slate-950 px-3 marquee-wrapper">
+                        <div class="marquee-content text-[8px] text-slate-600 uppercase font-black italic tracking-widest">${f.file.name}</div>
+                    </div>`;
                 grid.appendChild(card);
             });
             const ghost = document.createElement('div');
@@ -331,8 +343,9 @@
                     }
                     if (f.file.name.match(/\.(dng|tiff)$/i)) {
                         const ab = await f.file.arrayBuffer(); const ifds = UTIF.decode(ab); UTIF.decodeImage(ab, ifds[0]);
+                        const rgba = UTIF.toRGBA8(ifds[0]);
                         const cvs = document.createElement('canvas'); cvs.width = ifds[0].width; cvs.height = ifds[0].height;
-                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(UTIF.toRGBA8(ifds[0]).buffer), cvs.width, cvs.height), 0, 0);
+                        cvs.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer), cvs.width, cvs.height), 0, 0);
                         b = await new Promise(r => cvs.toBlob(r, 'image/jpeg'));
                     }
 
@@ -368,7 +381,7 @@
                 document.getElementById('errorFileList').innerText = errors.join('\n');
                 document.getElementById('errorReportModal').classList.remove('hidden');
             }
-            document.getElementById('statusLabel').innerText = "Process Complete";
+            document.getElementById('statusLabel').innerText = "All Files Synthesized";
             document.getElementById('progressBar').style.width = '100%';
             document.getElementById('statusPercent').innerText = '100%';
         }
@@ -377,7 +390,7 @@
             const url = URL.createObjectURL(b);
             const grid = document.getElementById('resultsGrid');
             const card = document.createElement('div');
-            card.className = "bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-in flex flex-col group cursor-pointer shadow-2xl";
+            card.className = "relative aspect-square bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden animate-in flex flex-col group cursor-pointer shadow-2xl";
             card.onclick = () => openLightbox(url, n, formatSize(b.size));
             card.innerHTML = `
                 <div class="aspect-square bg-black flex items-center justify-center relative p-3 overflow-hidden">
@@ -385,8 +398,10 @@
                     <div class="absolute inset-0 bg-emerald-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-slate-950 italic tracking-widest">Preview</span></div>
                     <span class="absolute bottom-4 right-4 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono tracking-tighter">${formatSize(b.size)}</span>
                 </div>
-                <div class="p-5 bg-slate-950 flex flex-col gap-4">
-                    <span class="text-[9px] text-slate-500 truncate block font-bold uppercase text-center italic tracking-widest">${n}</span>
+                <div class="p-5 bg-slate-950 flex flex-col gap-4 overflow-hidden">
+                    <div class="marquee-wrapper">
+                        <div class="marquee-content text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div>
+                    </div>
                     <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center transition-all shadow-lg">Save Image</a>
                 </div>`;
             grid.appendChild(card);
@@ -402,7 +417,7 @@
                 item.innerHTML = `<div class="w-full aspect-square bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
                     <img id="dup-img-${index}" class="dup-img w-full h-full object-cover opacity-0 transition-opacity duration-700">
                     <div class="absolute inset-0 bg-amber-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[8px] font-black uppercase text-white">Preview</span></div>
-                </div><p class="text-[8px] text-slate-500 truncate w-full text-center font-bold uppercase tracking-tighter font-mono">${file.name}</p>`;
+                </div><div class="marquee-wrapper"><div class="marquee-content text-[8px] text-slate-500 text-center font-bold uppercase tracking-tighter font-mono">${file.name}</div></div>`;
                 list.appendChild(item);
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -430,11 +445,11 @@
         window.removeFile = (id) => { workspaceFiles = workspaceFiles.filter(f => f.id !== id); updateUI(); };
         window.clearQueue = () => { workspaceFiles = []; updateUI(); };
         window.resetWorkspace = () => { workspaceFiles = []; convertedRegistry = []; document.getElementById('resultsGrid').innerHTML = ''; document.getElementById('resultsSection').classList.add('hidden'); document.getElementById('progressContainer').classList.add('hidden'); updateUI(); };
-        window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').classList.remove('hidden'); document.body.classList.add('lightbox-active'); };
-        window.closeLightbox = () => { document.getElementById('lightbox').classList.add('hidden'); document.body.classList.remove('lightbox-active'); };
+        window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').style.display = 'flex'; document.body.classList.add('lightbox-active'); };
+        window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; document.body.classList.remove('lightbox-active'); };
 
-        document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_full_workspace.zip`; l.click(); };
-        document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_latest_only.zip`; l.click(); };
+        document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_collection.zip`; l.click(); };
+        document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_batch.zip`; l.click(); };
     </script>
 </body>
 </html>
