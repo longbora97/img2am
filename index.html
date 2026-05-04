@@ -27,10 +27,10 @@
         .lightbox-active { overflow: hidden; }
         .rotating { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* MARQUEE SYSTEM (Applied to long filenames) */
-        .marquee-wrapper { width: 100%; overflow: hidden; white-space: nowrap; position: relative; }
-        .marquee-content { display: inline-block; padding-left: 0; transition: transform 0.2s linear; }
-        .marquee-wrapper:hover .marquee-content { animation: marquee-scroll 10s linear infinite; }
+        /* MARQUEE SYSTEM */
+        .marquee-box { width: 100%; overflow: hidden; white-space: nowrap; position: relative; }
+        .marquee-text { display: inline-block; transition: transform 0.5s ease-in-out; }
+        .marquee-box:hover .marquee-text { animation: marquee-scroll 10s linear infinite; }
         @keyframes marquee-scroll {
             0% { transform: translateX(0); }
             10% { transform: translateX(0); }
@@ -53,12 +53,11 @@
         </div>
     </div>
 
-    <!-- ERROR REPORT MODAL -->
+    <!-- ERROR REPORT -->
     <div id="errorReportModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in">
         <div class="bg-slate-900 border border-red-500/30 w-full max-w-md rounded-[2.5rem] p-8 text-center shadow-2xl">
             <div class="text-4xl mb-4">💥</div>
             <h2 class="text-lg font-bold text-white uppercase tracking-widest mb-2">Processing Errors</h2>
-            <p class="text-[10px] text-slate-500 mb-6 uppercase">The following files could not be converted:</p>
             <div id="errorFileList" class="text-xs text-red-400 mb-6 max-h-32 overflow-y-auto custom-scroll font-bold whitespace-pre-wrap"></div>
             <button onclick="document.getElementById('errorReportModal').classList.add('hidden')" class="w-full bg-red-600/10 hover:bg-red-600/20 text-red-400 font-bold py-3 rounded-2xl transition-all uppercase text-[10px] tracking-widest border border-red-500/20">Close Report</button>
         </div>
@@ -68,8 +67,8 @@
     <div id="duplicateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
         <div class="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-[2.5rem] overflow-hidden shadow-2xl animate-in">
             <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-                <h2 class="text-sm font-bold uppercase tracking-widest text-amber-400">Duplicate Check</h2>
-                <span id="duplicateCountLabel" class="bg-amber-400/10 text-amber-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase">0 Conflicts</span>
+                <h2 class="text-sm font-bold uppercase tracking-widest text-amber-400 italic">Duplicate Conflict</h2>
+                <span id="duplicateCountLabel" class="bg-amber-400/10 text-amber-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase">0</span>
             </div>
             <div id="duplicateList" class="p-6 max-h-[400px] overflow-y-auto custom-scroll grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
             <div class="p-6 bg-slate-950/50 border-t border-slate-800 flex gap-3 justify-end">
@@ -91,7 +90,6 @@
         </header>
 
         <div class="grid lg:grid-cols-12 gap-6 md:gap-10">
-            <!-- SIDEBAR -->
             <aside class="lg:col-span-3 space-y-6">
                 <div class="bg-slate-900/40 border border-slate-800/60 rounded-[2rem] p-7 backdrop-blur-md sticky top-8 shadow-2xl">
                     <h2 class="text-[11px] font-bold mb-8 text-slate-500 uppercase tracking-widest italic">Settings</h2>
@@ -128,7 +126,6 @@
                 </div>
             </aside>
 
-            <!-- WORKSPACE -->
             <main class="lg:col-span-9 space-y-10 min-w-0">
                 <div id="dropzone" class="relative bg-slate-900/10 border-2 border-dashed border-slate-800/60 rounded-[3rem] p-4 md:p-8 flex flex-col min-h-[450px]">
                     <input type="file" id="imageInput" multiple accept="image/*,.heic,.heif,.dng,.tiff" class="hidden">
@@ -145,7 +142,6 @@
                     <div id="queueGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 flex-grow content-start"></div>
                 </div>
 
-                <!-- PROGRESS AREA -->
                 <div id="progressContainer" class="hidden bg-slate-900/50 border border-slate-800 p-6 md:p-8 rounded-[3rem] animate-in shadow-2xl relative">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <div class="flex flex-col items-center sm:items-start min-w-0 w-full">
@@ -167,7 +163,6 @@
                     <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden shadow-inner"><div id="progressBar" class="w-0 h-full bg-gradient-to-r from-blue-600 to-indigo-400 transition-all duration-300"></div></div>
                 </div>
 
-                <!-- RESULTS GALLERY -->
                 <section id="resultsSection" class="hidden space-y-8 animate-in">
                     <div class="flex flex-col sm:flex-row justify-between items-center px-4 gap-6">
                         <div class="flex items-center gap-4">
@@ -195,9 +190,6 @@
     </footer>
 
     <script>
-        /**
-         * img2am - MASTER LOGIC BY LONG BORA
-         */
         const _0x_d = "{{ALLOWED_DOMAIN}}"; 
         const _0x_a = "aW1nMmFtLWxvbmctYm9yYQ=="; 
         const _p = ["https://", "api.", "counterapi", ".dev/v1/", "/visits/up"];
@@ -220,7 +212,7 @@
                     document.getElementById('vCount').innerText = "VISITOR: " + d.count.toLocaleString();
                 }).catch(() => document.getElementById('vCount').innerText = "VISITOR: ONLINE");
             } else {
-                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Forbidden</h1><p>License restricted to "+_0x_d+"</p></div>";
+                document.body.innerHTML = "<div style='color:white;text-align:center;padding-top:20%'><h1>403 - Unauthorized Domain</h1><p>License restricted to "+_0x_d+"</p></div>";
             }
         };
 
@@ -310,12 +302,12 @@
                         <div class="absolute top-4 left-4 w-2.5 h-2.5 rounded-full transition-all ${dot}"></div>
                     </div>
                     <div class="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','left')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">↺</button>
-                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">↻</button>
+                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','left')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono text-center">↺</button>
+                        <button onclick="event.stopPropagation(); rotateFile('${f.id}','right')" class="bg-slate-800 hover:bg-slate-700 text-white w-7 h-7 rounded-full text-xs font-bold font-mono text-center">↻</button>
                         <button onclick="event.stopPropagation(); removeFile('${f.id}')" class="bg-red-500 hover:bg-red-400 text-white w-7 h-7 rounded-full text-xs font-bold font-mono">✕</button>
                     </div>
-                    <div class="pt-1 pb-5 px-6 bg-slate-950 marquee-wrapper">
-                        <div class="marquee-content text-[8px] text-slate-600 uppercase font-bold italic tracking-widest text-center">${f.file.name}</div>
+                    <div class="pt-1 pb-5 px-6 bg-slate-950 marquee-box">
+                        <div class="marquee-text text-[8px] text-slate-600 uppercase font-bold italic tracking-widest text-center">${f.file.name}</div>
                     </div>`;
                 grid.appendChild(card);
             });
@@ -412,34 +404,49 @@
                     <div class="absolute inset-0 bg-emerald-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[10px] font-black uppercase text-slate-950 italic tracking-widest">Preview</span></div>
                     <span class="absolute bottom-4 right-4 bg-emerald-500 text-[7px] text-slate-950 px-2 py-0.5 rounded-full font-black shadow-lg font-mono tracking-tighter">${formatSize(b.size)}</span>
                 </div>
-                <div class="pt-2 pb-5 px-6 bg-slate-950 flex flex-col gap-3 overflow-hidden">
-                    <div class="marquee-wrapper"><div class="marquee-content text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div></div>
+                <div class="pt-2 pb-5 px-6 bg-slate-950 flex flex-col gap-4 overflow-hidden">
+                    <div class="marquee-box"><div class="marquee-text text-[9px] text-slate-500 font-bold uppercase text-center italic tracking-widest">${n}</div></div>
                     <a href="${url}" download="${n}" onclick="event.stopPropagation()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-[9px] uppercase py-3 rounded-2xl text-center transition-all shadow-lg">Save Image</a>
                 </div>`;
             grid.appendChild(card);
+        }
+
+        async function runDupLoader() {
+            // SEQUENTIAL LOADER FOR DUPLICATES
+            const dupImgs = document.querySelectorAll('.dup-img-tag');
+            for (let i = 0; i < dupImgs.length; i++) {
+                const img = dupImgs[i];
+                const fileIndex = parseInt(img.dataset.idx);
+                const file = pendingDuplicates[fileIndex];
+                try {
+                    const url = await genT(file);
+                    img.src = url;
+                    img.onload = () => img.classList.remove('opacity-0');
+                    // Add lightbox click to the card
+                    img.closest('.dup-card').onclick = () => openLightbox(url, file.name, formatSize(file.size));
+                } catch (e) { console.error("Dup Load Error", e); }
+            }
         }
 
         function showDuplicateModal() {
             const list = document.getElementById('duplicateList');
             list.innerHTML = '';
             document.getElementById('duplicateCountLabel').innerText = `${pendingDuplicates.length} Conflicts`;
+            
             pendingDuplicates.forEach((file, index) => {
                 const item = document.createElement('div');
-                item.className = "bg-slate-950 p-4 rounded-[1.5rem] border border-slate-800 flex flex-col items-center gap-3 relative cursor-pointer group";
-                item.innerHTML = `<div class="aspect-square w-full bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
-                    <img id="dup-img-${index}" class="dup-img w-full h-full object-cover opacity-0 transition-opacity duration-700">
-                    <div class="absolute inset-0 bg-amber-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[8px] font-black uppercase text-white">Preview</span></div>
-                </div><div class="marquee-wrapper"><div class="marquee-content text-[8px] text-slate-500 text-center font-bold uppercase tracking-tighter font-mono">${file.name}</div></div>`;
+                item.className = "dup-card bg-slate-950 p-4 rounded-[1.5rem] border border-slate-800 flex flex-col items-center gap-3 relative cursor-pointer group";
+                item.innerHTML = `
+                    <div class="aspect-square w-full bg-slate-900 rounded-xl overflow-hidden relative shadow-inner">
+                        <img data-idx="${index}" class="dup-img-tag w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                        <div class="absolute inset-0 bg-amber-500/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><span class="text-[8px] font-black uppercase text-white">Preview</span></div>
+                    </div>
+                    <div class="marquee-box"><div class="marquee-text text-[8px] text-slate-500 text-center font-bold uppercase tracking-tighter font-mono">${file.name}</div></div>`;
                 list.appendChild(item);
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.getElementById(`dup-img-${index}`);
-                    img.src = e.target.result; img.onload = () => img.classList.remove('opacity-0');
-                    item.onclick = () => openLightbox(e.target.result, file.name, formatSize(file.size));
-                };
-                reader.readAsDataURL(file.slice(0, 100000));
             });
+
             document.getElementById('duplicateModal').classList.remove('hidden');
+            runDupLoader(); // Start sequential loading
         }
 
         window.resolveAll = (action) => {
@@ -457,8 +464,8 @@
         window.removeFile = (id) => { workspaceFiles = workspaceFiles.filter(f => f.id !== id); updateUI(); };
         window.clearQueue = () => { workspaceFiles = []; updateUI(); };
         window.resetWorkspace = () => { workspaceFiles = []; convertedRegistry = []; document.getElementById('resultsGrid').innerHTML = ''; document.getElementById('resultsSection').classList.add('hidden'); document.getElementById('progressContainer').classList.add('hidden'); updateUI(); };
-        window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').classList.remove('hidden'); document.body.classList.add('lightbox-active'); };
-        window.closeLightbox = () => { document.getElementById('lightbox').classList.add('hidden'); document.body.classList.remove('lightbox-active'); };
+        window.openLightbox = (url, n, s) => { if(!url) return; document.getElementById('lightboxImg').src = url; document.getElementById('lightboxName').innerText = n; document.getElementById('lightboxSize').innerText = s; document.getElementById('lightbox').style.display = 'flex'; document.body.classList.add('lightbox-active'); };
+        window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; document.body.classList.remove('lightbox-active'); };
 
         document.getElementById('downloadAllBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_collection.zip`; l.click(); };
         document.getElementById('downloadLatestBtn').onclick = async () => { const zip = new JSZip(); convertedRegistry.filter(r => latestProcessedIds.includes(r.id)).forEach(f => zip.file(f.name, f.blob)); const c = await zip.generateAsync({type: "blob"}); const l = document.createElement('a'); l.href = URL.createObjectURL(c); l.download = `img2am_batch.zip`; l.click(); };
